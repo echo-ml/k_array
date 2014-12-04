@@ -312,6 +312,64 @@ IndexInteger get_num_elements(const Shape& shape) {
 // get_1d_index //
 //////////////////
 
+namespace detail {
+
+template<
+    int I
+  , class Shape
+  , enable_if<is_contiguous_shape<Shape>> = 0
+>
+IndexInteger get_1d_index_impl(const Shape& shape, IndexInteger i) {
+  return i;
+}
+
+template<
+    int I
+  , class Shape
+  , class... Indexes
+  , enable_if<is_contiguous_shape<Shape>> = 0
+>
+IndexInteger get_1d_index_impl(const Shape& shape, IndexInteger i, Indexes... i_rest) {
+  return i + get_extent<I>(shape)*get_1d_index_impl<I+1>(shape, i_rest...);
+}
+
+template<
+    int I
+  , class Shape
+  , enable_if<is_subshape<Shape>> = 0
+>
+IndexInteger get_1d_index_impl(const Shape& shape, IndexInteger i) {
+  return get_stride<I>(shape)*i;
+}
+
+template<
+    int I
+  , class Shape
+  , class... Indexes
+  , enable_if<is_subshape<Shape>> = 0
+>
+IndexInteger get_1d_index_impl(const Shape& shape, IndexInteger i, Indexes... i_rest) {
+  return get_stride<I>(shape)*i + get_1d_index_impl<I+1>(shape, i_rest...);
+}
+
+} //end namespace detail
+
+template<
+    class Shape
+  , class... Indexes
+  , enable_if<is_shape<Shape>> = 0
+>
+Index<1> get_1d_index(const Shape& shape, Indexes... indexes) {
+  static_assert(sizeof...(Indexes) == get_rank<Shape>()
+              , "number of indexes must match the rank of the dimensionality");
+  static_assert(
+      const_algorithm::and_(
+          fatal::constant_sequence<bool, std::is_convertible<Indexes, IndexInteger>::value...>()
+      )
+    , "indexes must be convertible to IndexInteger");
+  return Index<1>{detail::get_1d_index_impl<0>(shape, indexes...)};
+};
+
 //////////////////
 // get_nd_index //
 //////////////////

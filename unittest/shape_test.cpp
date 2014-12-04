@@ -16,7 +16,7 @@ struct Shape1 {
   IndexInteger dynamic_stride() const { return 1; }
 };
 
-struct Shape2 {
+struct FalseSubshape1 {
   using Dimensionality = StaticIndex<2, 3, 4>;
   using Strides        = StaticIndex<1, 2>;
   template<int I>
@@ -26,7 +26,7 @@ struct Shape2 {
   IndexInteger dynamic_stride() const { return 1; }
 };
 
-struct Shape3 {
+struct Shape2 {
   using Dimensionality = StaticIndex<3, 2, Dimension::kDynamic, Dimension::kDynamic>;
 
   template<int I>
@@ -63,7 +63,7 @@ struct Subshape1 {
 
 TEST_CASE("shape") {
   Shape1 shape1;
-  Shape3 shape3;
+  Shape2 shape2;
   Subshape1 subshape1;
 
   SECTION("dimensionality concept") {
@@ -80,52 +80,52 @@ TEST_CASE("shape") {
   }
   SECTION("shape concept") {
     REQUIRE(is_subshape<Shape1>());
-    REQUIRE(!is_subshape<Shape2>());
+    REQUIRE(!is_subshape<FalseSubshape1>());
     REQUIRE(!is_subshape<int>());
 
-    REQUIRE(is_contiguous_shape<Shape3>());
+    REQUIRE(is_contiguous_shape<Shape2>());
 
-    REQUIRE(is_shape<Shape3>());
+    REQUIRE(is_shape<Shape2>());
     REQUIRE(is_shape<Shape1>());
 
     REQUIRE(is_static_shape<Shape1>());
-    REQUIRE(!is_static_shape<Shape3>());
+    REQUIRE(!is_static_shape<Shape2>());
   }
   SECTION("get_extent") {
     type_equal<
-        decltype(get_extent<0>(shape3))
+        decltype(get_extent<0>(shape2))
       , StaticIndex<3>
     >();
     type_equal<
-        decltype(get_extent<1>(shape3))
+        decltype(get_extent<1>(shape2))
       , StaticIndex<2>
     >();
-    REQUIRE(get_extent<2>(shape3) == 7);
-    REQUIRE(get_extent<3>(shape3) == 8);
+    REQUIRE(get_extent<2>(shape2) == 7);
+    REQUIRE(get_extent<3>(shape2) == 8);
   }
   SECTION("is_static_stride") {
-    REQUIRE(is_static_stride<0, Shape3>());
-    REQUIRE(is_static_stride<1, Shape3>());
-    REQUIRE(is_static_stride<2, Shape3>());
-    REQUIRE(!is_static_stride<3, Shape3>());
+    REQUIRE(is_static_stride<0, Shape2>());
+    REQUIRE(is_static_stride<1, Shape2>());
+    REQUIRE(is_static_stride<2, Shape2>());
+    REQUIRE(!is_static_stride<3, Shape2>());
 
     REQUIRE(is_static_stride<0, Subshape1>());
     REQUIRE(!is_static_stride<2, Subshape1>());
   }
   SECTION("get_stride") {
     type_equal<
-        decltype(get_stride<0>(shape3))
+        decltype(get_stride<0>(shape2))
       , StaticIndex<1>
     >();
     type_equal<
-        decltype(get_stride<1>(shape3))
+        decltype(get_stride<1>(shape2))
       , StaticIndex<3>
     >();
     type_equal<
-        decltype(get_stride<2>(shape3))
+        decltype(get_stride<2>(shape2))
       , StaticIndex<6>
     >();
-    REQUIRE(get_stride<3>(shape3) == 42);
+    REQUIRE(get_stride<3>(shape2) == 42);
 
     type_equal<
         decltype(get_stride<0>(subshape1))
@@ -140,6 +140,11 @@ TEST_CASE("shape") {
         decltype(get_num_elements(shape1))
       , StaticIndex<24>
     >();
-    REQUIRE(get_num_elements(shape3) == 336);
+    REQUIRE(get_num_elements(shape2) == 336);
+  }
+
+  SECTION("get_1d_index") {
+    REQUIRE(get_1d_index(shape2, 1, 0, 5, 3) == 157);
+    REQUIRE(get_1d_index(subshape1, 1, 2, 3, 0) == 48);
   }
 }
