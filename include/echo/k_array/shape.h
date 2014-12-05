@@ -90,7 +90,7 @@ TICK_TRAIT(is_contiguous_shape) {
 TICK_TRAIT(is_shape) {
   template<class Shape>
   auto requires_(const Shape& shape) -> tick::valid<
-      is_true_c<is_contiguous_shape<Shape>() || is_subshape<Shape>()>
+      is_true_c<is_contiguous_shape<Shape>::value || is_subshape<Shape>::value>
   >;
 };
 

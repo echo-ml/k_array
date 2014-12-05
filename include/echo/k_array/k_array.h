@@ -30,8 +30,11 @@ class KArray
   , Allocator
 {
  public:
-  using pointer       = typename std::allocator_traits<Allocator>::pointer;
-  using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+  using pointer         = typename std::allocator_traits<Allocator>::pointer;
+  using const_pointer   = typename std::allocator_traits<Allocator>::const_pointer;
+  using reference       = typename std::iterator_traits<pointer>::reference;
+  using const_reference = typename std::iterator_traits<const_pointer>::reference;
+  using value_type      = T;
 
   using KArrayAccessor<KArray, pointer>::operator();
   using KArrayConstAccessor<KArray, const_pointer>::operator();
@@ -107,6 +110,11 @@ class KArray
   const_pointer data() const {
     return _data;
   }
+
+  const Shape& shape() const {
+    return static_cast<const Shape&>(*this);
+  }
+
  private:
   void release() noexcept {
     this->deallocate(_data, get_num_elements(*this));
