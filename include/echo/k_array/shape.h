@@ -187,25 +187,6 @@ IndexInteger get_extent(const Shape& shape) {
 // is_static_stride //
 //////////////////////
 
-template<
-    int I
-  , class Shape
-  , enable_if<is_contiguous_shape<Shape>> = 0
->
-constexpr bool is_static_stride() {
-  using namespace const_algorithm;
-  return !contains(left<I>(Dimensionality<Shape>()), Dimension::Dynamic());
-}
-
-template<
-    int I
-  , class Shape
-  , enable_if<is_subshape<Shape>> = 0
->
-constexpr bool is_static_stride() {
-  return get<I>(StrideSequence<Shape>()) != Stride::kDynamic;
-}
-
 namespace detail {
 
 enum class StaticStrideType {
@@ -223,11 +204,13 @@ struct IsStaticStrideImpl<
   , Shape
   , StaticStrideType::ContiguousShape
 > 
-{
-  static const bool value = 
-      !const_algorithm::contains(
+  : std::integral_constant<
+        bool
+      , !const_algorithm::contains(
           const_algorithm::left<I>(Dimensionality<Shape>()), Dimension::Dynamic()
-       );
+        )
+    >
+{
 };
 
 template<int I, class Shape>
@@ -236,15 +219,17 @@ struct IsStaticStrideImpl<
   , Shape
   , StaticStrideType::Subshape
 >
+  : std::integral_constant<
+        bool
+      , get<I>(StrideSequence<Shape>()) != Stride::kDynamic
+    >
 {
-  static const bool value =
-      get<I>(StrideSequence<Shape>()) != Stride::kDynamic;
 };
 
 } //end namespace detail
 
 template<int I, class Shape>
-using IsStaticStride =
+using is_static_stride =
     detail::IsStaticStrideImpl<
         I
       , Shape
@@ -263,7 +248,7 @@ template<
     int I
   , class Shape
   , enable_if<is_contiguous_shape<Shape>> = 0
-  , enable_if<IsStaticStride<I, Shape>> = 0
+  , enable_if<is_static_stride<I, Shape>> = 0
 >
 constexpr auto get_stride(const Shape& shape) ->
     StaticIndex<
@@ -279,7 +264,7 @@ template<
     int I
   , class Shape
   , enable_if<is_contiguous_shape<Shape>> = 0
-  , disable_if<IsStaticStride<I, Shape>> = 0
+  , disable_if<is_static_stride<I, Shape>> = 0
 >
 constexpr IndexInteger get_stride(const Shape& shape) {
   return get_extent<I-1>(shape) * get_stride<I-1>(shape);
@@ -289,7 +274,7 @@ template<
     int I
   , class Shape
   , enable_if<is_subshape<Shape>> = 0
-  , enable_if<IsStaticStride<I, Shape>> = 0
+  , enable_if<is_static_stride<I, Shape>> = 0
 >
 constexpr auto get_stride(const Shape& shape) ->
     decltype(get<I>(StrideSequence<Shape>()))
@@ -301,7 +286,7 @@ template<
     int I
   , class Shape
   , enable_if<is_subshape<Shape>> = 0
-  , disable_if<IsStaticStride<I, Shape>> = 0
+  , disable_if<is_static_stride<I, Shape>> = 0
 >
 IndexInteger get_stride(const Shape& shape) {
   using namespace const_algorithm;
