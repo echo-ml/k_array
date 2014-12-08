@@ -408,4 +408,91 @@ Index<1> get_1d_index(const Shape& shape, Indexes... indexes) {
 // get_nd_index //
 //////////////////
 
+////////////////
+// operator== //
+////////////////
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_static_shape<Shape1>> = 0
+  , enable_if<is_static_shape<Shape2>> = 0
+  , enable_if<std::is_same<Shape1, Shape2>> = 0
+>
+constexpr std::true_type operator==(const Shape1&, const Shape2&) {
+  return {};
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , enable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+>
+constexpr std::false_type operator==(const Shape1&, const Shape2&) {
+  return {};
+}
+
+namespace detail {
+
+template<class Index1, class Index2>
+struct AreShapesStaticallyUnequal {
+  static const bool value = false;
+};
+
+template<
+    IndexInteger ExtentFirst1
+  , IndexInteger ExtentFirst2
+  , IndexInteger... ExtentsRest1
+  , IndexInteger... ExtentsRest2
+>
+struct AreShapesStaticallyUnequal<
+    StaticIndex<ExtentFirst1, ExtentsRest1...>
+  , StaticIndex<ExtentFirst2, ExtentsRest2...>
+> {
+  static const bool value = 
+          (ExtentFirst1 != Dimension::kDynamic 
+       && ExtentFirst2 != Dimension::kDynamic
+       && ExtentFirst1 != ExtentFirst2)
+       || AreShapesStaticallyUnequal<
+              StaticIndex<ExtentsRest1...>
+            , StaticIndex<ExtentsRest2...>
+          >::value;
+};
+
+} //end namespace detail
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , enable_if<
+        detail::AreShapesStaticallyUnequal<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0 
+>
+std::false_type operator==(const Shape1&, const Shape2&) {
+  return {};
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , disable_if<
+        detail::AreShapesStaticallyUnequal<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0
+>
+bool operator==(const Shape1& shape1, const Shape2& shape2) {
+  return false;
+}
+
 }} //end namespace
