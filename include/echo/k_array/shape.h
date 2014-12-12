@@ -496,7 +496,7 @@ template<
     int I
   , class Shape1
   , class Shape2
-  , enable_if_c<I == get_rank<Shape1>()> = 0
+  , enable_if_c<I == Shape1::Dimensionality::size> = 0
 >
 constexpr bool are_shapes_equal(const Shape1&, const Shape2&) {
   return true;
@@ -506,7 +506,7 @@ template<
     int I
   , class Shape1
   , class Shape2
-  , enable_if_c<I != get_rank<Shape1>()> = 0
+  , enable_if_c<I != Shape1::Dimensionality::size> = 0
 >
 bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
   return get_extent<I>(shape1) == get_extent<I>(shape2)
