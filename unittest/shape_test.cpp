@@ -1,4 +1,5 @@
 #include <echo/k_array/shape.h>
+#include <echo/k_array/k_shape.h>
 #include <echo/test.h>
 #include <catch.hpp>
 #include <cassert>
@@ -146,5 +147,50 @@ TEST_CASE("shape") {
   SECTION("get_1d_index") {
     REQUIRE(get_1d_index(shape2, 1, 0, 5, 3) == 157);
     REQUIRE(get_1d_index(subshape1, 1, 2, 3, 0) == 48);
+  }
+
+  SECTION("equality") {
+    using S1 = KShape<1, 2>;
+    using S2 = KShape<1, 2>;
+    using S3 = KShape<1, 2, 3>;
+    using S4 = KShape<2, 3>;
+    using S5 = KShape<1, Dimension::kDynamic, 3>;
+
+    type_equal<
+        decltype(S1() == S2())
+      , std::true_type
+    >();
+    type_equal<
+        decltype(S1() != S2())
+      , std::false_type
+    >();
+
+
+    type_equal<
+        decltype(S1() == S3())
+      , std::false_type
+    >();
+    type_equal<
+        decltype(S1() != S3())
+      , std::true_type
+    >();
+
+    type_equal<
+        decltype(S1() == S4())
+      , std::false_type
+    >();
+    type_equal<
+        decltype(S1() != S4())
+      , std::true_type
+    >();
+    
+    REQUIRE(S3() == S5(2));
+    REQUIRE(!(S3() != S5(2)));
+
+    REQUIRE(!(S3() == S5(5)));
+    REQUIRE(S3() != S5(5));
+
+    REQUIRE(S5(7) == S5(7));
+    REQUIRE(!(S5(7) != S5(7)));
   }
 }

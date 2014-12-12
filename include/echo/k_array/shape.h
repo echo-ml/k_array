@@ -412,33 +412,25 @@ Index<1> get_1d_index(const Shape& shape, Indexes... indexes) {
 // operator== //
 ////////////////
 
-template<
-    class Shape1
-  , class Shape2
-  , enable_if<is_static_shape<Shape1>> = 0
-  , enable_if<is_static_shape<Shape2>> = 0
-  , enable_if<std::is_same<Shape1, Shape2>> = 0
->
-constexpr std::true_type operator==(const Shape1&, const Shape2&) {
-  return {};
-}
-
-template<
-    class Shape1
-  , class Shape2
-  , enable_if<is_shape<Shape1>> = 0
-  , enable_if<is_shape<Shape2>> = 0
-  , enable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
->
-constexpr std::false_type operator==(const Shape1&, const Shape2&) {
-  return {};
-}
-
 namespace detail {
 
 template<class Index1, class Index2>
-struct AreShapesStaticallyUnequal {
+struct AreDimensionalitiesStaticallyUnequal {
   static const bool value = false;
+};
+
+template<
+    IndexInteger Extent1
+  , IndexInteger Extent2
+>
+struct AreDimensionalitiesStaticallyUnequal<
+    StaticIndex<Extent1>
+  , StaticIndex<Extent2>
+> {
+  static const bool value = 
+          Extent1 != Dimension::kDynamic 
+       && Extent2 != Dimension::kDynamic
+       && Extent1 != Extent2;
 };
 
 template<
@@ -447,7 +439,7 @@ template<
   , IndexInteger... ExtentsRest1
   , IndexInteger... ExtentsRest2
 >
-struct AreShapesStaticallyUnequal<
+struct AreDimensionalitiesStaticallyUnequal<
     StaticIndex<ExtentFirst1, ExtentsRest1...>
   , StaticIndex<ExtentFirst2, ExtentsRest2...>
 > {
@@ -455,11 +447,71 @@ struct AreShapesStaticallyUnequal<
           (ExtentFirst1 != Dimension::kDynamic 
        && ExtentFirst2 != Dimension::kDynamic
        && ExtentFirst1 != ExtentFirst2)
-       || AreShapesStaticallyUnequal<
+       || AreDimensionalitiesStaticallyUnequal<
               StaticIndex<ExtentsRest1...>
             , StaticIndex<ExtentsRest2...>
           >::value;
 };
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+>
+constexpr bool are_shapes_statically_unequal() {
+  return true;
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , disable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+  , enable_if<
+        AreDimensionalitiesStaticallyUnequal<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0
+>
+constexpr bool are_shapes_statically_unequal() {
+  return true;
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , disable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+  , disable_if<
+        AreDimensionalitiesStaticallyUnequal<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0
+>
+constexpr bool are_shapes_statically_unequal() {
+  return false;
+}
+
+template<
+    int I
+  , class Shape1
+  , class Shape2
+  , enable_if_c<I == get_rank<Shape1>()> = 0
+>
+constexpr bool are_shapes_equal(const Shape1&, const Shape2&) {
+  return true;
+}
+
+template<
+    int I
+  , class Shape1
+  , class Shape2
+  , enable_if_c<I != get_rank<Shape1>()> = 0
+>
+bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
+  return get_extent<I>(shape1) == get_extent<I>(shape2)
+      && are_shapes_equal<I+1>(shape1, shape2);
+}
 
 } //end namespace detail
 
@@ -468,14 +520,49 @@ template<
   , class Shape2
   , enable_if<is_shape<Shape1>> = 0
   , enable_if<is_shape<Shape2>> = 0
-  , enable_if<
-        detail::AreShapesStaticallyUnequal<
-            Dimensionality<Shape1>
-          , Dimensionality<Shape2>
-        >
-    > = 0 
+  , enable_if_c<detail::are_shapes_statically_unequal<Shape1, Shape2>()> = 0
 >
-std::false_type operator==(const Shape1&, const Shape2&) {
+constexpr std::false_type operator==(const Shape1&, const Shape2&) {
+  return {};
+}
+template<
+    class Shape1
+  , class Shape2
+  , enable_if_c<is_static_shape<Shape1>::value && is_static_shape<Shape2>::value> = 0
+  , enable_if<std::is_same<Shape1, Shape2>> = 0
+>
+constexpr std::true_type operator==(const Shape1, const Shape2&) {
+  return {};
+}
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , disable_if_c<is_static_shape<Shape1>::value && is_static_shape<Shape2>::value> = 0
+  , disable_if_c<detail::are_shapes_statically_unequal<Shape1, Shape2>()> = 0
+>
+bool operator==(const Shape1& shape1, const Shape2& shape2) {
+  return detail::are_shapes_equal<0>(shape1, shape2);
+}
+
+////////////////
+// operator!= //
+////////////////
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , enable_if<
+        std::is_same<
+            decltype(std::declval<Shape1>() == std::declval<Shape2>())
+          , std::true_type
+        >
+    > = 0
+>
+constexpr std::false_type operator!=(const Shape1& lhs, const Shape2& rhs) {
   return {};
 }
 
@@ -484,15 +571,31 @@ template<
   , class Shape2
   , enable_if<is_shape<Shape1>> = 0
   , enable_if<is_shape<Shape2>> = 0
-  , disable_if<
-        detail::AreShapesStaticallyUnequal<
-            Dimensionality<Shape1>
-          , Dimensionality<Shape2>
+  , enable_if<
+        std::is_same<
+            decltype(std::declval<Shape1>() == std::declval<Shape2>())
+          , std::false_type
         >
     > = 0
 >
-bool operator==(const Shape1& shape1, const Shape2& shape2) {
-  return false;
+constexpr std::true_type operator!=(const Shape1& lhs, const Shape2& rhs) {
+  return {};
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if<is_shape<Shape1>> = 0
+  , enable_if<is_shape<Shape2>> = 0
+  , enable_if<
+        std::is_same<
+            decltype(std::declval<Shape1>() == std::declval<Shape2>())
+          , bool
+        >
+    > = 0
+>
+bool operator!=(const Shape1& lhs, const Shape2& rhs) {
+  return !(lhs == rhs);
 }
 
 }} //end namespace
