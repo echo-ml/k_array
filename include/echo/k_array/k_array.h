@@ -101,6 +101,8 @@ class KArray
 
     _data = other._data;
     other._data = nullptr;
+
+    return *this;
   }
 
   pointer data() {

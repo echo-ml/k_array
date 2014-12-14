@@ -11,5 +11,6 @@ using echo::k_array::KArray;
 using echo::k_array::KArrayView;
 using echo::k_array::KShape;
 using echo::k_array::is_k_array;
+using echo::k_array::KArrayAssignment;
 
 } //end namespace echo
