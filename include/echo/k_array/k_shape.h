@@ -80,9 +80,7 @@ namespace detail {
 template<IndexInteger... Dimensions>
 auto get_k_shape_from_dimension_list(
         fatal::type_list<std::integral_constant<IndexInteger, Dimensions>...>)
-{
-  return std::declval<KShape<Dimensions...>>();
-}
+    -> KShape<Dimensions...>;
 
 template<class Shape>
 struct GetSubKShape {
