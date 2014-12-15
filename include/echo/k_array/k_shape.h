@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fatal/type/list.h>
 #include <echo/enable_if.h>
 #include <echo/index.h>
 #include <echo/const_algorithm.h>
@@ -7,9 +8,9 @@
 
 namespace echo { namespace k_array {
 
-////////////
-// KShape //
-////////////
+////////////////
+// KShapeBase //
+////////////////
 
 namespace detail {
 
@@ -38,6 +39,10 @@ class KShapeBase<0> {
 
 } //end namespace detail
 
+////////////
+// KShape //
+////////////
+
 template<IndexInteger... Dimensions>
 class KShape 
   : detail::KShapeBase<
@@ -65,5 +70,36 @@ class KShape
     return Base::template extent<I>();
   }
 };
+
+///////////////
+// SubKShape //
+///////////////
+
+namespace detail {
+
+template<IndexInteger... Dimensions>
+auto get_k_shape_from_dimension_list(
+        fatal::type_list<std::integral_constant<IndexInteger, Dimensions>...>)
+{
+  return std::declval<KShape<Dimensions...>>();
+}
+
+template<class Shape>
+struct GetSubKShape {
+  using DimensionList    = typename Shape::Dimensionality::list;
+  using SubdimensionList = typename DimensionList::template left<DimensionList::size-1>;
+  using type = decltype(get_k_shape_from_dimension_list(SubdimensionList()));
+};
+
+} //end namespace detail
+
+template<class Shape>
+using GetSubKShape = typename detail::GetSubKShape<Shape>::type;
+
+template<IndexInteger... Dimensions>
+const auto& get_sub_k_shape(const KShape<Dimensions...>& shape) {
+  using Shape = KShape<Dimensions...>;
+  return reinterpret_cast<const GetSubKShape<Shape>&>(shape);
+}
 
 }} //end namespace

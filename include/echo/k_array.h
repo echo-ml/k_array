@@ -12,5 +12,7 @@ using echo::k_array::KArrayView;
 using echo::k_array::KShape;
 using echo::k_array::is_k_array;
 using echo::k_array::KArrayAssignment;
+using echo::k_array::get_extent;
+using echo::k_array::get_num_dimensions;
 
 } //end namespace echo

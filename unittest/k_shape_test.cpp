@@ -6,6 +6,17 @@ using namespace echo::k_array;
 
 TEST_CASE("k_shape") {
   KShape<3, 10, Dimension::kDynamic, 7> shape1(4);
-  REQUIRE(is_contiguous_shape<decltype(shape1)>());
-  REQUIRE(get_num_elements(shape1) == 840);
+
+  SECTION("shape functions") {
+    REQUIRE(is_contiguous_shape<decltype(shape1)>());
+    REQUIRE(get_num_elements(shape1) == 840);
+  }
+  SECTION("sub_k_shape") {
+    auto subshape1 = get_sub_k_shape(shape1);
+    auto subshape2 = get_sub_k_shape(subshape1);
+    REQUIRE(get_num_dimensions<decltype(subshape1)>() == 3);
+    REQUIRE(get_num_dimensions<decltype(subshape2)>() == 2);
+
+    REQUIRE(get_extent<2>(subshape1) == 4);
+  }
 }

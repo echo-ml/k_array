@@ -129,14 +129,14 @@ template<class Shape>
 using StrideSequence = typename Shape::Strides;
 
 //////////////
-// get_rank //
+// get_num_dimensions //
 //////////////
 
 template<
     class Shape
   , enable_if<is_shape<Shape>> = 0
 >
-constexpr IndexInteger get_rank() {
+constexpr IndexInteger get_num_dimensions() {
   return Shape::Dimensionality::size;
 }
 
@@ -339,7 +339,7 @@ template<
   , disable_if<is_static_shape<Shape>> = 0
 >
 IndexInteger get_num_elements(const Shape& shape) {
-  return detail::get_num_elements_impl<get_rank<Shape>()-1>(shape);
+  return detail::get_num_elements_impl<get_num_dimensions<Shape>()-1>(shape);
 }
 
 //////////////////
@@ -394,7 +394,7 @@ template<
   , enable_if<is_shape<Shape>> = 0
 >
 Index<1> get_1d_index(const Shape& shape, Indexes... indexes) {
-  static_assert(sizeof...(Indexes) == get_rank<Shape>()
+  static_assert(sizeof...(Indexes) == get_num_dimensions<Shape>()
               , "number of indexes must match the rank of the dimensionality");
   static_assert(
       const_algorithm::and_(
@@ -456,7 +456,7 @@ struct AreDimensionalitiesStaticallyUnequal<
 template<
     class Shape1
   , class Shape2
-  , enable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+  , enable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
 >
 constexpr bool are_shapes_statically_unequal() {
   return true;
@@ -465,7 +465,7 @@ constexpr bool are_shapes_statically_unequal() {
 template<
     class Shape1
   , class Shape2
-  , disable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+  , disable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
   , enable_if<
         AreDimensionalitiesStaticallyUnequal<
             Dimensionality<Shape1>
@@ -480,7 +480,7 @@ constexpr bool are_shapes_statically_unequal() {
 template<
     class Shape1
   , class Shape2
-  , disable_if_c<get_rank<Shape1>() != get_rank<Shape2>()> = 0
+  , disable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
   , disable_if<
         AreDimensionalitiesStaticallyUnequal<
             Dimensionality<Shape1>
