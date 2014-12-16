@@ -37,33 +37,6 @@ struct GetSubKShape {
 
 } //end namespace detail
 
-////////////////
-// KShapeSwap //
-////////////////
-
-namespace detail {
-
-template<int I_, int J_, class Shape>
-struct KShapeSwap {
-  static const int I  = I_ < J_ ? I_ : J_;
-  static const int J  = I_ < J_ ? J_ : I_;
-  using DimensionList = typename Shape::Dimensionality::list;
-  using Left          = typename DimensionList::template left<I>;
-  using Right         = typename DimensionList::template right<DimensionList::size-J-1>;
-  using Middle        = typename DimensionList::template slice<I+1, J>;
-
-  using X = typename DimensionList::template at<I>;
-  using Y = typename DimensionList::template at<J>;
-
-  using LeftPrime  = typename Left::template push_back<Y>;
-  using RightPrime = typename Right::template push_front<X>;
-
-  using LeftMiddlePrime = typename LeftPrime::template concat<Middle>;
-  using type            = typename LeftMiddlePrime::template concat<RightPrime>;
-};
-
-} //end namespace detail
-
 //////////////////
 // swap_k_shape //
 //////////////////
@@ -118,6 +91,10 @@ class KShapeBase<0> {
   KShapeBase() {}
 
   KShapeBase(const Index<0>&) {}
+
+  Index<0> extents() const {
+    return {};
+  }
 };
 
 } //end namespace detail
@@ -149,7 +126,7 @@ class KShape
     : Base(dynamic_extents...)
   {}
 
-  KShape(const Index<Dimensionality::size>& extents) 
+  KShape(const Index<kNumDynamicExtents>& extents) 
     : Base(extents)
   {
   }
@@ -161,6 +138,10 @@ class KShape
 
   const Subshape& subshape() const {
     return reinterpret_cast<const Subshape&>(*this);
+  }
+
+  const auto& extents() const {
+    return Base::extents();
   }
 };
 
