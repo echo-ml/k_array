@@ -12,8 +12,8 @@ TEST_CASE("k_shape") {
     REQUIRE(get_num_elements(shape1) == 840);
   }
   SECTION("sub_k_shape") {
-    auto subshape1 = get_sub_k_shape(shape1);
-    auto subshape2 = get_sub_k_shape(subshape1);
+    auto subshape1 = shape1.subshape();
+    auto subshape2 = subshape1.subshape();
     REQUIRE(get_num_dimensions<decltype(subshape1)>() == 3);
     REQUIRE(get_num_dimensions<decltype(subshape2)>() == 2);
 
