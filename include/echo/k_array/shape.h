@@ -409,9 +409,9 @@ Index<1> get_1d_index(const Shape& shape, Indexes... indexes) {
 // get_nd_index //
 //////////////////
 
-////////////////
-// operator== //
-////////////////
+///////////////////////////////////
+// are_shapes_statically_unequal //
+///////////////////////////////////
 
 namespace detail {
 
@@ -493,6 +493,100 @@ constexpr bool are_shapes_statically_unequal() {
   return false;
 }
 
+} //end namespace detail
+
+/////////////////////////////////
+// are_shapes_statically_equal //
+/////////////////////////////////
+
+namespace detail {
+
+template<class Index1, class Index2>
+struct AreDimensionalitiesStaticallyEqual {
+  static const bool value = true;
+};
+
+template<
+    IndexInteger Extent1
+  , IndexInteger Extent2
+>
+struct AreDimensionalitiesStaticallyEqual<
+    StaticIndex<Extent1>
+  , StaticIndex<Extent2>
+> {
+  static const bool value = 
+          Extent1 != Dimension::kDynamic 
+       && Extent2 != Dimension::kDynamic
+       && Extent1 == Extent2;
+};
+
+template<
+    IndexInteger ExtentFirst1
+  , IndexInteger ExtentFirst2
+  , IndexInteger... ExtentsRest1
+  , IndexInteger... ExtentsRest2
+>
+struct AreDimensionalitiesStaticallyEqual<
+    StaticIndex<ExtentFirst1, ExtentsRest1...>
+  , StaticIndex<ExtentFirst2, ExtentsRest2...>
+> {
+  static const bool value = 
+          (ExtentFirst1 != Dimension::kDynamic 
+       && ExtentFirst2 != Dimension::kDynamic
+       && ExtentFirst1 == ExtentFirst2)
+       || AreDimensionalitiesStaticallyEqual<
+              StaticIndex<ExtentsRest1...>
+            , StaticIndex<ExtentsRest2...>
+          >::value;
+};
+
+template<
+    class Shape1
+  , class Shape2
+  , enable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
+>
+constexpr bool are_shapes_statically_equal() {
+  return false;
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , disable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
+  , enable_if<
+        AreDimensionalitiesStaticallyEqual<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0
+>
+constexpr bool are_shapes_statically_equal() {
+  return true;
+}
+
+template<
+    class Shape1
+  , class Shape2
+  , disable_if_c<get_num_dimensions<Shape1>() != get_num_dimensions<Shape2>()> = 0
+  , disable_if<
+        AreDimensionalitiesStaticallyEqual<
+            Dimensionality<Shape1>
+          , Dimensionality<Shape2>
+        >
+    > = 0
+>
+constexpr bool are_shapes_statically_equal() {
+  return false;
+}
+
+} //end namespace detail
+
+//////////////////////
+// are_shapes_equal //
+//////////////////////
+
+namespace detail {
+
 template<
     int I
   , class Shape1
@@ -516,6 +610,10 @@ bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
 
 } //end namespace detail
 
+////////////////
+// operator== //
+////////////////
+
 template<
     class Shape1
   , class Shape2
@@ -530,7 +628,7 @@ template<
     class Shape1
   , class Shape2
   , enable_if_c<is_static_shape<Shape1>::value && is_static_shape<Shape2>::value> = 0
-  , enable_if<std::is_same<Shape1, Shape2>> = 0
+  , enable_if_c<detail::are_shapes_statically_equal<Shape1, Shape2>()> = 0
 >
 constexpr std::true_type operator==(const Shape1, const Shape2&) {
   return {};
@@ -651,7 +749,7 @@ void assert_any_shapes_match_impl(const Shape& shape
                                 , const ShapeFirst& shape_first
                                 , const ShapesRest&... shapes_rest)
 {
-  ECHO_ASSERT(shape == shape_first);
+  ECHO_ASSERT(k_array::operator==(shape, shape_first));
   assert_any_shapes_match_impl(shape, shapes_rest...);
 }
 
