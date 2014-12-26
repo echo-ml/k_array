@@ -193,4 +193,24 @@ TEST_CASE("shape") {
     REQUIRE(S5(7) == S5(7));
     REQUIRE(!(S5(7) != S5(7)));
   }
+
+  SECTION("get_first_shape") {
+    using S1 = KShape<1, 2>;
+    using S2 = KShape<1, 3>;
+    auto shape = get_first_shape(3, 7, S1(), 9, S2());
+    type_equal<
+        decltype(shape)
+      , S1
+    >();
+  }
+
+  SECTION("assert_any_shapes_match") {
+    using S1 = KShape<1, 2>;
+    using S2 = KShape<1, 3>;
+    using S3 = KShape<1, 2>;
+
+    assert_any_shapes_match(S1(), 3, 4);
+    assert_any_shapes_match(S1(), S3(), 4);
+    // assert_any_shapes_match(S1(), 12, S2(), S3(), 4); //assertion failure
+  }
 }

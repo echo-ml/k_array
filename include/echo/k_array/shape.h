@@ -4,6 +4,7 @@
 #include <echo/enable_if.h>
 #include <echo/const_algorithm.h>
 #include <echo/index.h>
+#include <echo/assert.h>
 
 namespace echo { namespace k_array {
 
@@ -596,6 +597,82 @@ template<
 >
 bool operator!=(const Shape1& lhs, const Shape2& rhs) {
   return !(lhs == rhs);
+}
+
+/////////////////////
+// get_first_shape //
+/////////////////////
+
+template<
+    class TFirst
+  , class... TRest
+  , enable_if<is_shape<TFirst>> = 0
+>
+const auto& get_first_shape(const TFirst& x_first, const TRest&... x_rest) {
+  return x_first;
+}
+
+template<
+    class TFirst
+  , class... TRest
+  , disable_if<is_shape<TFirst>> = 0
+>
+const auto& get_first_shape(const TFirst& x_first, const TRest&... x_rest) {
+  static_assert(sizeof...(TRest) > 0, "arguments contain no shape");
+  return get_first_shape(x_rest...);
+}
+
+/////////////////////////////
+// assert_any_shapes_match //
+/////////////////////////////
+
+namespace detail {
+
+template<class Shape>
+void assert_any_shapes_match_impl(const Shape&) {
+}
+
+template<
+    class Shape
+  , class ShapeFirst
+  , class... ShapesRest
+  , disable_if<is_shape<ShapeFirst>> = 0
+>
+void assert_any_shapes_match_impl(const Shape& shape
+                                , const ShapeFirst& shape_first
+                                , const ShapesRest&... shapes_rest);
+template<
+    class Shape
+  , class ShapeFirst
+  , class... ShapesRest
+  , enable_if<is_shape<ShapeFirst>> = 0
+>
+void assert_any_shapes_match_impl(const Shape& shape
+                                , const ShapeFirst& shape_first
+                                , const ShapesRest&... shapes_rest)
+{
+  ECHO_ASSERT(shape == shape_first);
+  assert_any_shapes_match_impl(shape, shapes_rest...);
+}
+
+template<
+    class Shape
+  , class ShapeFirst
+  , class... ShapesRest
+  , disable_if<is_shape<ShapeFirst>>
+>
+void assert_any_shapes_match_impl(const Shape& shape
+                                , const ShapeFirst& shape_first
+                                , const ShapesRest&... shapes_rest)
+{
+  assert_any_shapes_match_impl(shape, shapes_rest...);
+}
+
+} //end namespace detail
+
+template<class... Shapes>
+void assert_any_shapes_match(const Shapes&... shapes) {
+  detail::assert_any_shapes_match_impl(get_first_shape(shapes...), shapes...);
 }
 
 }} //end namespace
