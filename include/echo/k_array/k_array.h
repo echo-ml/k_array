@@ -40,7 +40,7 @@ class KArray
   using KArrayConstAccessor<KArray, const_pointer>::operator();
   using KArrayAssignment<KArray, T>::operator=;
 
-  KArray(const Shape& shape, Allocator allocator=Allocator()) 
+  explicit KArray(const Shape& shape, Allocator allocator=Allocator()) 
     : Shape(shape)
     , Allocator(allocator)
   {

@@ -120,25 +120,25 @@ TICK_TRAIT(
 ////////////////////
 
 template<class Shape>
-using Dimensionality = typename Shape::Dimensionality;
+using Dimensionality = typename std::decay<Shape>::type::Dimensionality;
 
 ////////////////////
 // StrideSequence //
 ////////////////////
 
 template<class Shape>
-using StrideSequence = typename Shape::Strides;
+using StrideSequence = typename std::decay<Shape>::type::Strides;
 
-//////////////
+////////////////////////
 // get_num_dimensions //
-//////////////
+////////////////////////
 
 template<
     class Shape
   , enable_if<is_shape<Shape>> = 0
 >
 constexpr IndexInteger get_num_dimensions() {
-  return Shape::Dimensionality::size;
+  return std::decay<Shape>::type::Dimensionality::size;
 }
 
 //////////////////////
