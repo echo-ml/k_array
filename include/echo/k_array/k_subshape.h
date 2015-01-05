@@ -33,7 +33,7 @@ class KSubshape
       class... StrideExtents
     , enable_if<std::is_convertible<StrideExtents, IndexInteger>...> = 0
   >
-  KSubshape(const Shape& shape, StrideExtents... stride_extents)
+  explicit KSubshape(const Shape& shape, StrideExtents... stride_extents)
     : Shape(shape)
     , StrideContainer(stride_extents...)
   {}

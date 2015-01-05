@@ -10,12 +10,13 @@ namespace echo { namespace k_array {
 
 template<class Pointer, class Shape>
 class KArrayView 
-  : public Shape
+  : Shape
   , public KArrayConstAccessor<
         KArrayView<Pointer, Shape>
       , Pointer
     >
 {
+  static_assert(is_shape<Shape>(), "Shape does not model Shape concept");
  public:
   using pointer    = Pointer;
   using reference  = typename std::iterator_traits<Pointer>::reference;

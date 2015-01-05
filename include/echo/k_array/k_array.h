@@ -14,7 +14,7 @@ template<
   , class Allocator = std::allocator<T>
 >
 class KArray
-  : public Shape
+  : Shape
   , public KArrayAccessor<
         KArray<T, Shape, Allocator>
       , typename std::allocator_traits<Allocator>::pointer
@@ -29,6 +29,7 @@ class KArray
     >
   , Allocator
 {
+  static_assert(is_contiguous_shape<Shape>(), "shape must be contiguous");
  public:
   using pointer         = typename std::allocator_traits<Allocator>::pointer;
   using const_pointer   = typename std::allocator_traits<Allocator>::const_pointer;

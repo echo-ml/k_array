@@ -18,4 +18,6 @@ using echo::k_array::get_num_dimensions;
 using echo::k_array::Dimension;
 using echo::k_array::ListForm;
 
+namespace k_array_traits = k_array::k_array_traits;
+
 } //end namespace echo

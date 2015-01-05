@@ -82,11 +82,11 @@ class KShape
       class... Extents
     , enable_if<std::is_convertible<Extents, IndexInteger>...> = 0
   >
-  KShape(Extents... dynamic_extents)
+  explicit KShape(Extents... dynamic_extents)
     : Base(dynamic_extents...)
   {}
 
-  KShape(const Index<kNumDynamicExtents>& extents) 
+  explicit KShape(const Index<kNumDynamicExtents>& extents) 
     : Base(extents)
   {
   }

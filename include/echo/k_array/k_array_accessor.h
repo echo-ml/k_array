@@ -13,7 +13,7 @@ namespace echo { namespace k_array {
     operator()(Indexes... indexes) QUALIFIER \
     { \
       QUALIFIER Derived& derived = static_cast<QUALIFIER Derived&>(*this); \
-      return *(derived.data() + get_1d_index(derived, indexes...)); \
+      return *(derived.data() + get_1d_index(derived.shape(), indexes...)); \
     } \
     typename std::iterator_traits<Pointer>::reference \
     operator[](echo::Index<1> index) QUALIFIER { \

@@ -4,6 +4,10 @@
 
 namespace echo { namespace k_array {
 
+///////////////
+// KSequence //
+///////////////
+
 template<class Tag, int N>
 class KSequence {
  public:

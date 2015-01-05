@@ -195,13 +195,13 @@ TEST_CASE("shape") {
   }
 
   SECTION("get_first_shape") {
-    using S1 = KShape<1, 2>;
-    using S2 = KShape<1, 3>;
-    auto shape = get_first_shape(3, 7, S1(), 9, S2());
-    type_equal<
-        decltype(shape)
-      , S1
-    >();
+    // using S1 = KShape<1, 2>;
+    // using S2 = KShape<1, 3>;
+    // auto shape = get_first_shape(3, 7, S1(), 9, S2());
+    // type_equal<
+    //     decltype(shape)
+    //   , S1
+    // >();
   }
 
   SECTION("assert_any_shapes_match") {
@@ -209,8 +209,8 @@ TEST_CASE("shape") {
     using S2 = KShape<1, 3>;
     using S3 = KShape<1, 2>;
 
-    assert_any_shapes_match(S1(), 3, 4);
-    assert_any_shapes_match(S1(), S3(), 4);
+    // assert_any_shapes_match(S1(), 3, 4);
+    // assert_any_shapes_match(S1(), S3(), 4);
     // assert_any_shapes_match(S1(), 12, S2(), S3(), 4); //assertion failure
   }
 }
