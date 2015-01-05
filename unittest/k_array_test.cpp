@@ -1,8 +1,12 @@
 #include <echo/k_array/k_array.h>
 #include <echo/k_array/k_array_view.h>
+#include <echo/k_array/k_subarray_view.h>
 #include <echo/k_array/k_shape.h>
+#include <echo/k_array/k_subshape.h>
 #include <echo/k_array/k_array_iteration.h>
 #include <echo/k_array/list_form_printer.h>
+#include <echo/k_array/slice.h>
+#include <echo/test.h>
 #include <catch.hpp>
 #include <numeric>
 
@@ -39,6 +43,25 @@ TEST_CASE("k_array") {
     k_array2 = std::move(k_array1);
     REQUIRE(k_array2(1, 0, 0) == 1);
   }
+}
+
+TEST_CASE("slice") {
+  using Shape1 = KShape<2, Dimension::kDynamic, Dimension::kDynamic>;
+  Shape1 shape1(3,4);
+
+  auto subshape1 = slice(shape1, 1, Slice::Null(), StaticIndex<2>());
+
+  type_equal<
+      decltype(subshape1)
+    , KSubshape<KShape<Dimension::kDynamic, 2>, 1, Stride::kDynamic>
+  >();
+
+  REQUIRE(get_extent<0>(subshape1) == 1);
+  REQUIRE(get_extent<1>(subshape1) == 2);
+  REQUIRE(get_stride<0>(subshape1) == 1);
+  REQUIRE(get_stride<1>(subshape1) == 6);
+
+  auto subshape2 = slice(subshape1, Slice::Null(), Slice::Full());
 }
 
 TEST_CASE("printers") {

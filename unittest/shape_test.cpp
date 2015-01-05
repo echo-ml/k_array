@@ -9,7 +9,7 @@ using namespace echo::k_array;
 
 struct Shape1 {
   using Dimensionality = StaticIndex<2, 3, 4>;
-  using Strides        = StaticIndex<1, 2, 6>;
+  using StrideSequence        = StaticIndex<1, 2, 6>;
   template<int I>
   IndexInteger dynamic_extent() const { return 1; }
 
@@ -19,7 +19,7 @@ struct Shape1 {
 
 struct FalseSubshape1 {
   using Dimensionality = StaticIndex<2, 3, 4>;
-  using Strides        = StaticIndex<1, 2>;
+  using StrideSequence        = StaticIndex<1, 2>;
   template<int I>
   IndexInteger dynamic_extent() const { return 1; }
 
@@ -45,7 +45,7 @@ struct Shape2 {
 
 struct Subshape1 {
   using Dimensionality = StaticIndex<2, 3, 4, Dimension::kDynamic>;
-  using Strides        = StaticIndex<2, 5, Stride::kDynamic, Stride::kDynamic>;
+  using StrideSequence        = StaticIndex<2, 5, Stride::kDynamic, Stride::kDynamic>;
   template<int I>
   IndexInteger dynamic_extent() const { return 1; }
 

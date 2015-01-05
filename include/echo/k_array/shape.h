@@ -26,6 +26,18 @@ struct Stride {
   using Dynamic = StaticIndex<kDynamic>;
 };
 
+///////////
+// Slice //
+///////////
+
+struct Slice {
+  static const IndexInteger kFull = -2;
+  using Full = StaticIndex<kFull>;
+
+  static const int kNull = -3;
+  using Null = StaticIndex<kNull>;
+};
+
 ///////////////////////
 // is_dimensionality //
 ///////////////////////
@@ -64,10 +76,10 @@ TICK_TRAIT(is_subshape) {
   template<class Shape>
   auto requires_(const Shape& shape) -> tick::valid<
       is_true<is_dimensionality<typename Shape::Dimensionality>>
-    , is_true<is_stride_sequence<typename Shape::Strides>>
+    , is_true<is_stride_sequence<typename Shape::StrideSequence>>
     , decltype(shape.template dynamic_extent<0>())
     , decltype(shape.template dynamic_stride<0>())
-    , is_true_c<Shape::Dimensionality::size == Shape::Strides::size>
+    , is_true_c<Shape::Dimensionality::size == Shape::StrideSequence::size>
   >;
 };
 
@@ -127,7 +139,7 @@ using Dimensionality = typename std::decay<Shape>::type::Dimensionality;
 ////////////////////
 
 template<class Shape>
-using StrideSequence = typename std::decay<Shape>::type::Strides;
+using StrideSequence = typename std::decay<Shape>::type::StrideSequence;
 
 ////////////////////////
 // get_num_dimensions //
@@ -241,6 +253,22 @@ using is_static_stride =
       : detail::StaticStrideType::Invalid
     >;
 
+///////////////////////
+// get_static_stride //
+///////////////////////
+
+template<
+    int I
+  , class Shape
+  , enable_if<is_contiguous_shape<Shape>> = 0
+  , enable_if<is_static_stride<I, Shape>> = 0
+>
+constexpr int get_static_stride() {
+  return const_algorithm::product(
+      const_algorithm::left<I>(Dimensionality<Shape>())
+  );
+}
+
 ////////////////
 // get_stride //
 ////////////////
@@ -253,9 +281,10 @@ template<
 >
 constexpr auto get_stride(const Shape& shape) ->
     StaticIndex<
-        const_algorithm::product(
-            const_algorithm::left<I>(Dimensionality<Shape>())
-        )
+        get_static_stride<I, Shape>()
+        // const_algorithm::product(
+        //     const_algorithm::left<I>(Dimensionality<Shape>())
+        // )
     >
 {
   return {};

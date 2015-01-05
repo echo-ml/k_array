@@ -5,6 +5,7 @@
 #include <echo/index.h>
 #include <echo/const_algorithm.h>
 #include <echo/k_array/shape.h>
+#include <echo/k_array/k_sequence.h>
 
 namespace echo { namespace k_array {
 
@@ -51,68 +52,27 @@ auto swap_k_shape(const Shape& shape) {
 
 } //end namespace detail
 
-////////////////
-// KShapeBase //
-////////////////
-
-namespace detail {
-
-template<int N>
-class KShapeBase {
- public:
-  template<
-      class... Extents
-  >
-  KShapeBase(Extents... extents) 
-    : _extents(extents...)
-  {
-  }
-
-  KShapeBase(const Index<N>& extents)
-    : _extents(extents)
-  {}
-
-  template<int I>
-  IndexInteger extent() const {
-    return get<I>(_extents);
-  }
-
-  Index<N> extents() const {
-    return _extents;
-  }
-
- private:
-  Index<N> _extents;
-};
-
-template<>
-class KShapeBase<0> {
- public:
-  KShapeBase() {}
-
-  KShapeBase(const Index<0>&) {}
-
-  Index<0> extents() const {
-    return {};
-  }
-};
-
-} //end namespace detail
-
 ////////////
 // KShape //
 ////////////
 
+namespace detail {
+
+struct k_shape_tag {};
+
+} //end namespace detail
+
 template<IndexInteger... Dimensions>
 class KShape 
-  : detail::KShapeBase<
-        const_algorithm::count(StaticIndex<Dimensions...>(), Dimension::Dynamic())
+  : KSequence<
+        detail::k_shape_tag
+      , const_algorithm::count(StaticIndex<Dimensions...>(), Dimension::Dynamic())
   >
 {
   static constexpr IndexInteger kNumDynamicExtents = 
               const_algorithm::count(StaticIndex<Dimensions...>(), Dimension::Dynamic());
 
-  using Base = detail::KShapeBase<kNumDynamicExtents>;
+  using Base = KSequence<detail::k_shape_tag, kNumDynamicExtents>;
 
  public:
   using Dimensionality = StaticIndex<Dimensions...>;
