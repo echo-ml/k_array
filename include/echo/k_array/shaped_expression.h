@@ -49,7 +49,7 @@ template<
 >
 constexpr auto get_extent(const Expression& expression) { 
   using Shape = typename std::decay<decltype(std::declval<Expression>().shape())>::type;
-  return get_num_dimensions<Shape>();
+  return get_extent<I>(expression.shape());
 }
 
 ////////////////
@@ -63,7 +63,7 @@ template<
 >
 constexpr auto get_stride(const Expression& expression) { 
   using Shape = typename std::decay<decltype(std::declval<Expression>().shape())>::type;
-  return get_num_dimensions<Shape>();
+  return get_stride<I>(expression.shape());
 }
 
 //////////////////////

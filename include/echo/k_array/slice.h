@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/k_array/shape.h>
+#include <echo/k_array/k_shape.h>
 #include <echo/k_array/k_subshape.h>
 
 namespace echo { namespace k_array {
