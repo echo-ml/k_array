@@ -1,4 +1,5 @@
 #include <echo/k_array/k_shape.h>
+#include <echo/test.h>
 #include <catch.hpp>
 
 using namespace echo;
@@ -18,5 +19,22 @@ TEST_CASE("k_shape") {
     REQUIRE(get_num_dimensions<decltype(subshape2)>() == 2);
 
     REQUIRE(get_extent<2>(subshape1) == 4);
+  }
+  SECTION("make_k_shape") {
+    auto shape1 = make_k_shape(3,4);
+    REQUIRE(get_extent<0>(shape1) == 3);
+    REQUIRE(get_extent<1>(shape1) == 4);
+    type_equal<
+        decltype(shape1)
+      , KShape<Dimension::kDynamic, Dimension::kDynamic>
+    >();
+
+    auto shape2 = make_k_shape(StaticIndex<3>(), StaticIndex<7>());
+    REQUIRE(get_extent<0>(shape2) == 3);
+    REQUIRE(get_extent<1>(shape2) == 7);
+    type_equal<
+        decltype(shape2)
+      , KShape<3, 7>
+    >();
   }
 }

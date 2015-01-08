@@ -11,6 +11,7 @@
 namespace echo {
 
 using echo::k_array::KShape;
+using echo::k_array::make_k_shape;
 using echo::k_array::KSubshape;
 using echo::k_array::KArray;
 using echo::k_array::KArrayView;
