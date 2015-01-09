@@ -563,7 +563,7 @@ struct AreDimensionalitiesStaticallyEqual<
           (ExtentFirst1 != Dimension::kDynamic 
        && ExtentFirst2 != Dimension::kDynamic
        && ExtentFirst1 == ExtentFirst2)
-       || AreDimensionalitiesStaticallyEqual<
+       && AreDimensionalitiesStaticallyEqual<
               StaticIndex<ExtentsRest1...>
             , StaticIndex<ExtentsRest2...>
           >::value;
