@@ -84,7 +84,7 @@ class KArray
       _data = this->allocate(other_num_elements);
     }
 
-    static_cast<Shape&>(*this) = other;
+    static_cast<Shape&>(*this) = other.shape();
 
     //TODO: allow for customization point on copy
     std::copy_n(other._data, other_num_elements, _data);
@@ -98,12 +98,17 @@ class KArray
     
     release();
     
-    static_cast<Shape&>(*this) = other;
+    static_cast<Shape&>(*this) = other.shape();
 
     _data = other._data;
     other._data = nullptr;
 
     return *this;
+  }
+
+  void swap(KArray& other) noexcept {
+    std::swap(static_cast<Shape&>(*this), static_cast<Shape&>(other));
+    std::swap(_data, other._data);
   }
 
   pointer data() {

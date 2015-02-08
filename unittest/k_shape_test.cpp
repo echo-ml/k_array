@@ -10,6 +10,7 @@ TEST_CASE("k_shape") {
 
   SECTION("shape functions") {
     REQUIRE(is_contiguous_shape<decltype(shape1)>());
+    REQUIRE(is_contiguous_shape<KShape<3>>());
     REQUIRE(get_num_elements(shape1) == 840);
   }
   SECTION("sub_k_shape") {
