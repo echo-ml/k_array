@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/index.h>
+#include <algorithm>
 
 namespace echo { namespace k_array {
 
@@ -14,14 +15,18 @@ class KSequence {
   template<
       class... Extents
   >
-  KSequence(Extents... extents) 
+  explicit KSequence(Extents... extents) 
     : _extents(extents...)
   {
   }
 
-  KSequence(const Index<N>& extents)
+  explicit KSequence(const Index<N>& extents)
     : _extents(extents)
   {}
+
+  KSequence() {
+    std::fill_n(_extents.begin(), N, 0);
+  }
 
   template<int I>
   IndexInteger extent() const {

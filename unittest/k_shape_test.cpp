@@ -29,6 +29,10 @@ TEST_CASE("k_shape") {
         decltype(shape1)
       , KShape<Dimension::kDynamic, Dimension::kDynamic>
     >();
+    type_equal<
+        decltype(shape1)
+      , KShapeFromExtents<int, int>
+    >();
 
     auto shape2 = make_k_shape(StaticIndex<3>(), StaticIndex<7>());
     REQUIRE(get_extent<0>(shape2) == 3);
@@ -36,6 +40,10 @@ TEST_CASE("k_shape") {
     type_equal<
         decltype(shape2)
       , KShape<3, 7>
+    >();
+    type_equal<
+        decltype(shape2)
+      , KShapeFromExtents<StaticIndex<3>, StaticIndex<7>>
     >();
   }
 }

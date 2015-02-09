@@ -35,7 +35,7 @@ class KArray
 
   using KArrayAssignment<KArray, T>::operator=;
 
-  explicit KArray(const Shape& shape, Allocator allocator=Allocator()) 
+  explicit KArray(const Shape& shape=Shape(), const Allocator& allocator=Allocator()) 
     : Shape(shape)
     , Allocator(allocator)
   {
@@ -110,6 +110,10 @@ class KArray
   }
 
   const_pointer data() const {
+    return _data;
+  }
+
+  const_pointer const_data() const {
     return _data;
   }
 

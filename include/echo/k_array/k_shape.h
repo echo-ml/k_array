@@ -27,7 +27,7 @@ auto get_k_shape_from_dimension_list(
 // GetSubKShape //
 //////////////////
 
-namespace detail {
+namespace detail { namespace k_shape {
 
 template<class Shape>
 struct GetSubKShape {
@@ -36,46 +36,34 @@ struct GetSubKShape {
   using type = decltype(get_k_shape_from_dimension_list(SubdimensionList()));
 };
 
-} //end namespace detail
-
-//////////////////
-// swap_k_shape //
-//////////////////
-
-namespace detail {
-
-template<int I, int J, class Shape>
-auto swap_k_shape(const Shape& shape) {
-  auto extents = shape.extents();
-  
-}
-
-} //end namespace detail
+}} //end namespace detail::k_shape
 
 ////////////
 // KShape //
 ////////////
 
-namespace detail {
+namespace detail { namespace k_shape {
 
 struct k_shape_tag {};
 
-} //end namespace detail
+}} //end namespace detail::k_shape
 
 template<IndexInteger... Dimensions>
 class KShape 
   : KSequence<
-        detail::k_shape_tag
+        detail::k_shape::k_shape_tag
       , const_algorithm::count(StaticIndex<Dimensions...>(), Dimension::Dynamic())
   >
 {
  public:
   static constexpr IndexInteger kNumDynamicExtents = 
               const_algorithm::count(StaticIndex<Dimensions...>(), Dimension::Dynamic());
-  using Base = KSequence<detail::k_shape_tag, kNumDynamicExtents>;
+  using Base = KSequence<detail::k_shape::k_shape_tag, kNumDynamicExtents>;
 
   using Dimensionality = StaticIndex<Dimensions...>;
-  using Subshape       = typename detail::GetSubKShape<KShape>::type;
+  using Subshape       = typename detail::k_shape::GetSubKShape<KShape>::type;
+
+  KShape() {}
 
   template<
       class... Extents
@@ -89,6 +77,7 @@ class KShape
     : Base(extents)
   {
   }
+
 
   template<int I>
   IndexInteger dynamic_extent() const {
@@ -108,7 +97,7 @@ class KShape
 // GetKShapeType //
 ///////////////////
 
-namespace detail {
+namespace detail { namespace k_shape {
 
 inline
 fatal::constant_sequence<IndexInteger> get_dimensionality_sequence() 
@@ -157,13 +146,13 @@ using GetKShapeType = decltype(
     get_k_shape_type(get_dimensionality_sequence(std::declval<Extents>()...))
 );
 
-} //end namespace detail
+}} //end namespace detail
 
 /////////////////////////
 // set_dynamic_extents //
 /////////////////////////
 
-namespace detail {
+namespace detail { namespace k_shape {
 
 template<int I, int N>
 void set_dynamic_k_shape_extents(Index<N>& dynamic_extents) {}
@@ -209,7 +198,7 @@ void set_dynamic_k_shape_extents(Index<N>& dynamic_extents
   set_dynamic_k_shape_extents<I+1>(dynamic_extents, extents_rest...);
 }
 
-} //end namespace detail
+}} //end namespace detail::k_shape
 
 //////////////////
 // make_k_shape //
@@ -217,10 +206,18 @@ void set_dynamic_k_shape_extents(Index<N>& dynamic_extents
 
 template<class... Extents>
 auto make_k_shape(Extents... extents) {
-  using Result = detail::GetKShapeType<Extents...>;
+  using namespace detail::k_shape;
+  using Result = GetKShapeType<Extents...>;
   Index<Result::kNumDynamicExtents> dynamic_extents;
-  detail::set_dynamic_k_shape_extents<0>(dynamic_extents, extents...);
+  set_dynamic_k_shape_extents<0>(dynamic_extents, extents...);
   return Result(dynamic_extents);
 }
+
+///////////////////////
+// KShapeFromExtents //
+///////////////////////
+
+template<class... Extents>
+using KShapeFromExtents = decltype(make_k_shape(std::declval<Extents>()...));
 
 }} //end namespace

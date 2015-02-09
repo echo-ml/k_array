@@ -22,7 +22,11 @@ TEST_CASE("k_array") {
   KArray1 k_array1(shape1), k_array2(shape1);
   std::iota(all_begin(k_array1), all_end(k_array1), 0);
 
-  auto k_array_view1 = make_k_array_view(k_array1);
+  auto k_array_view1  = make_k_array_view(k_array1);
+  auto k_array_cview1 = make_k_array_cview(k_array1);
+
+  KArray<double, KShape<Dimension::kDynamic>> k_array3;
+  REQUIRE(get_num_elements(k_array3) == 0);
 
   SECTION("accessor") {
     REQUIRE(k_array1(1, 0, 0) == 1);
