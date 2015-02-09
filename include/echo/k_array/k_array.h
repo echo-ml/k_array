@@ -19,10 +19,6 @@ class KArray
         KArray<T, Shape, Allocator>
       , typename std::allocator_traits<Allocator>::pointer
     >
-  , public KArrayConstAccessor<
-        KArray<T, Shape, Allocator>
-      , typename std::allocator_traits<Allocator>::const_pointer
-    >
   , public KArrayAssignment<
         KArray<T, Shape, Allocator>
       , T
@@ -37,8 +33,6 @@ class KArray
   using const_reference = typename std::iterator_traits<const_pointer>::reference;
   using value_type      = T;
 
-  using KArrayAccessor<KArray, pointer>::operator();
-  using KArrayConstAccessor<KArray, const_pointer>::operator();
   using KArrayAssignment<KArray, T>::operator=;
 
   explicit KArray(const Shape& shape, Allocator allocator=Allocator()) 

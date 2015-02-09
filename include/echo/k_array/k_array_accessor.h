@@ -5,25 +5,37 @@
 
 namespace echo { namespace k_array {
 
-#define MAKE_ACCESSOR(QUALIFIER_NAME, QUALIFIER) \
-  template<class Derived, class Pointer> \
-  struct KArray ## QUALIFIER_NAME ## Accessor { \
-    template<class... Indexes> \
-    typename std::iterator_traits<Pointer>::reference \
-    operator()(Indexes... indexes) QUALIFIER \
-    { \
-      QUALIFIER Derived& derived = static_cast<QUALIFIER Derived&>(*this); \
-      return *(derived.data() + get_1d_index(derived.shape(), indexes...)); \
-    } \
-    typename std::iterator_traits<Pointer>::reference \
-    operator[](echo::Index<1> index) QUALIFIER { \
-      QUALIFIER Derived& derived = static_cast<QUALIFIER Derived&>(*this); \
-      return *(derived.data() + index); \
-    } \
-  };
+template<class Derived, class Pointer>
+struct KArrayConstAccessor {
+  template<class... Indexes> 
+  decltype(auto) operator()(Indexes... indexes) const 
+  { 
+    const Derived& derived = static_cast<const Derived&>(*this); 
+    return *(derived.data() + get_1d_index(derived.shape(), indexes...)); 
+  } 
+  decltype(auto) operator[](echo::Index<1> index) const { 
+    const Derived& derived = static_cast<const Derived&>(*this); 
+    return *(derived.data() + index); 
+  } 
+};
 
-MAKE_ACCESSOR(/*none*/,/*none*/)
-MAKE_ACCESSOR(Const, const)
+template<class Derived, class Pointer>
+struct KArrayAccessor
+  : KArrayConstAccessor<Derived, Pointer>
+{
+  using KArrayConstAccessor<Derived, Pointer>::operator();
+  using KArrayConstAccessor<Derived, Pointer>::operator[];
+  template<class... Indexes>
+  decltype(auto) operator()(Indexes... indexes) 
+  { 
+    Derived& derived = static_cast<Derived&>(*this); 
+    return *(derived.data() + get_1d_index(derived.shape(), indexes...)); 
+  } 
+  decltype(auto) operator[](echo::Index<1> index) { 
+    Derived& derived = static_cast<Derived&>(*this); 
+    return *(derived.data() + index); 
+  } 
+};
 
 #undef MAKE_ACCESSOR
 
