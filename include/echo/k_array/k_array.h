@@ -1,5 +1,6 @@
 #pragma once
 
+#include <echo/static_allocator.h>
 #include <echo/k_array/k_array_accessor.h>
 #include <echo/k_array/k_array_assignment.h>
 
@@ -127,6 +128,53 @@ class KArray
     _data = nullptr;
   }
   pointer _data;
+};
+
+template<
+    class T
+  , class Shape
+  , int Alignment
+>
+class KArray<
+    T
+  , Shape
+  , StaticAllocator<T, Alignment>
+> : Shape
+  , StaticAllocator<T, Alignment>::template buffer_type<
+      decltype(get_num_elements(Shape()))::value
+    >
+  , public KArrayAccessor<
+        KArray<T, Shape, StaticAllocator<T, Alignment>>
+      , T*
+    >
+  , public KArrayAssignment<
+        KArray<T, Shape, StaticAllocator<T, Alignment>>
+      , T
+    >
+{
+  static_assert(is_contiguous_shape<Shape>(), "shape must be contiguous");
+  static_assert(is_static_shape<Shape>(), "shape must be static for static arrays");
+ public:
+  using pointer         = T*;
+  using const_pointer   = const T*;
+  using reference       = T&;
+  using const_reference = const T&;
+  using value_type      = T;
+
+  using Buffer = 
+      typename StaticAllocator<T, Alignment>::template buffer_type<
+          decltype(get_num_elements(Shape()))::value
+      >;
+
+  using KArrayAssignment<KArray, T>::operator=;
+
+  using Buffer::data;
+  using Buffer::const_data;
+
+  const Shape& shape() const {
+    return static_cast<const Shape&>(*this);
+  }
+
 };
 
 }} //end namespace echo::k_array

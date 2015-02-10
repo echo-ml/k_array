@@ -86,3 +86,14 @@ TEST_CASE("printers") {
   oss << ListForm() << k_array2 << "\n";
   oss << ListForm() << k_array3 << "\n";
 }
+
+TEST_CASE("static k_array") {
+  KArray<double, KShape<2 ,3>, StaticAllocator<double>> a1;
+  a1 = {1, 2, 3, 4, 5, 6};
+  REQUIRE(a1(1, 0) == 2);
+
+  KArray<double, KShape<2 ,3>, StaticAllocator<double>> a2;
+  std::iota(all_begin(a2), all_end(a2), 2);
+  a1 = a2;
+  REQUIRE(a1(1, 0) == 3);
+}
