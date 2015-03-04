@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/k_array/slice.h>
+#include <echo/k_array/copy.h>
 #include <echo/k_array/k_shape.h>
 #include <echo/k_array/k_subshape.h>
 #include <echo/k_array/k_array.h>

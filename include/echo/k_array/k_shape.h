@@ -88,7 +88,7 @@ class KShape
     return reinterpret_cast<const Subshape&>(*this);
   }
 
-  const auto& extents() const {
+  const auto& dynamic_extents() const {
     return Base::extents();
   }
 };

@@ -47,6 +47,10 @@ class KSubshape
   IndexInteger dynamic_stride() const {
     return StrideContainer::template extent<I>();
   }
+
+  const auto& dynamic_strides() const {
+    return StrideContainer::extents();
+  }
 };
 
 }} //end namespace echo::k_array
