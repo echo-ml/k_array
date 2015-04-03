@@ -7,6 +7,8 @@
 using namespace echo;
 using namespace echo::k_array;
 
+namespace shape_concept = echo::k_array::concept;
+
 struct Shape1 {
   using Dimensionality = StaticIndex<2, 3, 4>;
   using StrideSequence        = StaticIndex<1, 2, 6>;
@@ -68,29 +70,31 @@ TEST_CASE("shape") {
   Subshape1 subshape1;
 
   SECTION("dimensionality concept") {
-    REQUIRE(is_dimensionality<StaticIndex<3, Dimension::kDynamic>>());
-    REQUIRE(!is_dimensionality<StaticIndex<-3, Dimension::kDynamic>>());
-    REQUIRE(!is_dimensionality<StaticIndex<>>());
-    REQUIRE(!is_dimensionality<int>());
+    REQUIRE(shape_concept::dimensionality<StaticIndex<2, 3, 4>>());
+
+    REQUIRE(shape_concept::dimensionality<StaticIndex<3, Dimension::kDynamic>>());
+    REQUIRE(!shape_concept::dimensionality<StaticIndex<-3, Dimension::kDynamic>>());
+    REQUIRE(!shape_concept::dimensionality<StaticIndex<>>());
+    REQUIRE(!shape_concept::dimensionality<int>());
   }
   SECTION("stride_sequence concept") {
-    REQUIRE(is_stride_sequence<StaticIndex<3, Dimension::kDynamic>>());
-    REQUIRE(!is_stride_sequence<StaticIndex<-3, Dimension::kDynamic>>());
-    REQUIRE(!is_stride_sequence<StaticIndex<>>());
-    REQUIRE(!is_stride_sequence<int>());
+    REQUIRE(shape_concept::stride_sequence<StaticIndex<3, Dimension::kDynamic>>());
+    REQUIRE(!shape_concept::stride_sequence<StaticIndex<-3, Dimension::kDynamic>>());
+    REQUIRE(!shape_concept::stride_sequence<StaticIndex<>>());
+    REQUIRE(!shape_concept::stride_sequence<int>());
   }
   SECTION("shape concept") {
-    REQUIRE(is_subshape<Shape1>());
-    REQUIRE(!is_subshape<FalseSubshape1>());
-    REQUIRE(!is_subshape<int>());
+    REQUIRE(shape_concept::subshape<Shape1>());
+    REQUIRE(!shape_concept::subshape<FalseSubshape1>());
+    REQUIRE(!shape_concept::subshape<int>());
 
-    REQUIRE(is_contiguous_shape<Shape2>());
+    REQUIRE(shape_concept::contiguous_shape<Shape2>());
 
-    REQUIRE(is_shape<Shape2>());
-    REQUIRE(is_shape<Shape1>());
+    REQUIRE(shape_concept::shape<Shape2>());
+    REQUIRE(shape_concept::shape<Shape1>());
 
-    REQUIRE(is_static_shape<Shape1>());
-    REQUIRE(!is_static_shape<Shape2>());
+    REQUIRE(shape_concept::static_shape<Shape1>());
+    REQUIRE(!shape_concept::static_shape<Shape2>());
   }
   SECTION("get_extent") {
     type_equal<
