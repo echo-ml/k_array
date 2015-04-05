@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/k_array/dimensionality.h>
+#include <echo/k_array/shape_traits.h>
 #include <echo/k_array/concept.h>
 #include <echo/concept.h>
 #include <echo/enable_if.h>
@@ -109,7 +110,7 @@ constexpr IndexInteger get_num_dimensions() {
 
 template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>())>
 constexpr bool is_static_extent() {
-  return get<I>(Dimensionality<Shape>()) != Dimension::kDynamic;
+  return get<I>(shape_traits::dimensionality<Shape>()) != Dimension::kDynamic;
 }
 
 ////////////////
@@ -119,7 +120,7 @@ constexpr bool is_static_extent() {
 template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() &&
                                                is_static_extent<I, Shape>())>
 constexpr auto get_extent(const Shape& shape)
-    -> decltype(get<I>(Dimensionality<Shape>())) {
+    -> decltype(get<I>(shape_traits::dimensionality<Shape>())) {
   return {};
 }
 
@@ -127,8 +128,8 @@ template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() &&
                                                !is_static_extent<I, Shape>())>
 IndexInteger get_extent(const Shape& shape) {
   using namespace const_algorithm;
-  constexpr int dynamic_index =
-      count(left<I>(Dimensionality<Shape>()), Dimension::Dynamic());
+  constexpr int dynamic_index = count(
+      left<I>(shape_traits::dimensionality<Shape>()), Dimension::Dynamic());
   return shape.template dynamic_extent<dynamic_index>();
 }
 
@@ -146,15 +147,17 @@ struct IsStaticStrideImpl {};
 
 template <int I, class Shape>
 struct IsStaticStrideImpl<I, Shape, StaticStrideType::ContiguousShape>
-    : std::integral_constant<bool, !const_algorithm::contains(
-                                       const_algorithm::left<I>(
-                                           Dimensionality<Shape>()),
-                                       Dimension::Dynamic())> {};
+    : std::integral_constant<bool,
+                             !const_algorithm::contains(
+                                 const_algorithm::left<I>(
+                                     shape_traits::dimensionality<Shape>()),
+                                 Dimension::Dynamic())> {};
 
 template <int I, class Shape>
 struct IsStaticStrideImpl<I, Shape, StaticStrideType::Subshape>
-    : std::integral_constant<bool, get<I>(StrideSequence<Shape>()) !=
-                                       Stride::kDynamic> {};
+    : std::integral_constant<bool,
+                             get<I>(shape_traits::stride_sequence<Shape>()) !=
+                                 Stride::kDynamic> {};
 }
 }  // end namespace detail
 
@@ -174,7 +177,7 @@ template <int I, class Shape, CONCEPT_REQUIRES(is_contiguous_shape<Shape>() &&
                                                is_static_stride<I, Shape>())>
 constexpr int get_static_stride() {
   return const_algorithm::product(
-      const_algorithm::left<I>(Dimensionality<Shape>()));
+      const_algorithm::left<I>(shape_traits::dimensionality<Shape>()));
 }
 
 ////////////////
@@ -199,7 +202,7 @@ constexpr IndexInteger get_stride(const Shape& shape) {
 template <int I, class Shape, CONCEPT_REQUIRES(concept::subshape<Shape>() &&
                                                is_static_stride<I, Shape>())>
 constexpr auto get_stride(const Shape& shape)
-    -> decltype(get<I>(StrideSequence<Shape>())) {
+    -> decltype(get<I>(shape_traits::stride_sequence<Shape>())) {
   return {};
 }
 
@@ -208,7 +211,7 @@ template <int I, class Shape, CONCEPT_REQUIRES(concept::subshape<Shape>() &&
 IndexInteger get_stride(const Shape& shape) {
   using namespace const_algorithm;
   constexpr int dynamic_index =
-      count(left<I>(StrideSequence<Shape>()), Stride::Dynamic());
+      count(left<I>(shape_traits::stride_sequence<Shape>()), Stride::Dynamic());
   return shape.template dynamic_stride<dynamic_index>();
 }
 
@@ -217,8 +220,8 @@ IndexInteger get_stride(const Shape& shape) {
 //////////////////////
 
 template <class Shape, CONCEPT_REQUIRES(is_static_shape<Shape>())>
-constexpr auto get_num_elements(const Shape& shape)
-    -> StaticIndex<const_algorithm::product(Dimensionality<Shape>())> {
+constexpr auto get_num_elements(const Shape& shape) -> StaticIndex<
+    const_algorithm::product(shape_traits::dimensionality<Shape>())> {
   return {};
 }
 
@@ -331,19 +334,21 @@ constexpr bool are_shapes_statically_unequal() {
 }
 
 template <class Shape1, class Shape2,
-          CONCEPT_REQUIRES(
-              get_num_dimensions<Shape1>() == get_num_dimensions<Shape2>() &&
-              AreDimensionalitiesStaticallyUnequal<Dimensionality<Shape1>,
-                                                   Dimensionality<Shape2>>())>
+          CONCEPT_REQUIRES(get_num_dimensions<Shape1>() ==
+                               get_num_dimensions<Shape2>() &&
+                           AreDimensionalitiesStaticallyUnequal<
+                               shape_traits::dimensionality<Shape1>,
+                               shape_traits::dimensionality<Shape2>>())>
 constexpr bool are_shapes_statically_unequal() {
   return true;
 }
 
 template <class Shape1, class Shape2,
-          CONCEPT_REQUIRES(
-              get_num_dimensions<Shape1>() == get_num_dimensions<Shape2>() &&
-              !AreDimensionalitiesStaticallyUnequal<Dimensionality<Shape1>,
-                                                    Dimensionality<Shape2>>())>
+          CONCEPT_REQUIRES(get_num_dimensions<Shape1>() ==
+                               get_num_dimensions<Shape2>() &&
+                           !AreDimensionalitiesStaticallyUnequal<
+                               shape_traits::dimensionality<Shape1>,
+                               shape_traits::dimensionality<Shape2>>())>
 constexpr bool are_shapes_statically_unequal() {
   return false;
 }
@@ -390,19 +395,21 @@ constexpr bool are_shapes_statically_equal() {
 }
 
 template <class Shape1, class Shape2,
-          CONCEPT_REQUIRES(
-              get_num_dimensions<Shape1>() == get_num_dimensions<Shape2>() &&
-              AreDimensionalitiesStaticallyEqual<Dimensionality<Shape1>,
-                                                 Dimensionality<Shape2>>())>
+          CONCEPT_REQUIRES(get_num_dimensions<Shape1>() ==
+                               get_num_dimensions<Shape2>() &&
+                           AreDimensionalitiesStaticallyEqual<
+                               shape_traits::dimensionality<Shape1>,
+                               shape_traits::dimensionality<Shape2>>())>
 constexpr bool are_shapes_statically_equal() {
   return true;
 }
 
 template <class Shape1, class Shape2,
-          CONCEPT_REQUIRES(
-              get_num_dimensions<Shape1>() == get_num_dimensions<Shape2>() &&
-              !AreDimensionalitiesStaticallyEqual<Dimensionality<Shape1>,
-                                                  Dimensionality<Shape2>>())>
+          CONCEPT_REQUIRES(get_num_dimensions<Shape1>() ==
+                               get_num_dimensions<Shape2>() &&
+                           !AreDimensionalitiesStaticallyEqual<
+                               shape_traits::dimensionality<Shape1>,
+                               shape_traits::dimensionality<Shape2>>())>
 constexpr bool are_shapes_statically_equal() {
   return false;
 }

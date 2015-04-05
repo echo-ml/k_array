@@ -119,6 +119,49 @@ template <class T>
 constexpr bool static_shape() {
   return models<detail::concept::StaticShape, T>();
 }
+
+/////////////
+// k_array //
+/////////////
+
+namespace detail { namespace concept {
+
+struct KArray : Concept {
+  template<class KArray>
+  auto require(KArray&& x) -> list<
+      echo::concept::contiguous_iterator<decltype(x.data())>()
+      ,shape<uncvref_t<decltype(x.shape())>>()
+  >;
+};
+
+}}
+
+template<class T>
+constexpr bool k_array() {
+  return models<detail::concept::KArray, T>();
+}
+
+////////////////////////
+// contiguous_k_array //
+////////////////////////
+
+namespace detail { namespace concept {
+
+struct ContiguousKArray : Concept {
+  template<class KArray>
+  auto require(KArray&& x) -> list<
+      k_array<KArray>(),
+      contiguous_shape<uncvref_t<decltype(x.shape())>>()
+  >;
+};
+
+}}
+
+template<class T>
+constexpr bool contiguous_k_array() {
+  return models<detail::concept::ContiguousKArray, T>();
+}
+
 }
 }
 }
