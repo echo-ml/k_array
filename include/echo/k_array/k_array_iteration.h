@@ -6,7 +6,8 @@
 
 #include <boost/range.hpp>
 
-namespace echo { namespace k_array {
+namespace echo { 
+namespace k_array {
 
 template<
     class KArray
@@ -68,5 +69,6 @@ auto all_crange(const KArray& k_array) {
   return boost::make_iterator_range(all_begin(k_array), all_end(k_array));
 }
 
-}} //end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo
 

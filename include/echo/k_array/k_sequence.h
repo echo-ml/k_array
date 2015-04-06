@@ -41,5 +41,5 @@ class KSequence<Tag, 0> {
 
   Index<0> extents() const { return {}; }
 };
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

@@ -28,5 +28,5 @@ class KSubarrayView
  private:
   pointer _data;
 };
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

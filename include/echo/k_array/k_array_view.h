@@ -61,5 +61,5 @@ template <class KArray, CONCEPT_REQUIRES(concept::contiguous_k_array<KArray>())>
 auto make_k_array_cview(const KArray& k_array) {
   return make_k_array_view(k_array.const_data(), k_array.shape());
 }
-}
-}  // end namespace
+}  // namespace k_array
+}  // namespace echo

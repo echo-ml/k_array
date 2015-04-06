@@ -16,4 +16,5 @@ using dimensionality = typename Shape::Dimensionality;
 template<class Shape>
 using stride_sequence = typename Shape::StrideSequence;
 
-}}
+}  // namespace shape_traits
+}  // namespace echo

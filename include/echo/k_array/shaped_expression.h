@@ -97,7 +97,7 @@ void assert_any_shaped_match_impl(const Shape& shape,
                                   const ShapedRest&... shaped_rest) {
   assert_any_shaped_match_impl(shape, shaped_rest...);
 }
-}
+}  // namespace shaped_expression
 }  // end namespace detail
 
 template <class... Shaped>
@@ -105,5 +105,5 @@ void assert_any_shaped_match(const Shaped&... shaped) {
   detail::shaped_expression::assert_any_shaped_match_impl(
       get_first_shaped(shaped...), shaped...);
 }
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

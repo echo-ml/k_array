@@ -33,5 +33,5 @@ struct KArrayAccessor : KArrayConstAccessor<Derived, Pointer> {
     return *(derived.data() + index);
   }
 };
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

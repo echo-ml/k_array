@@ -23,8 +23,8 @@ template <IndexInteger... Dimensions>
 auto get_k_shape_from_dimension_list(
     fatal::type_list<std::integral_constant<IndexInteger, Dimensions>...>)
     -> KShape<Dimensions...>;
-}
-}
+}  // namespace k_shape
+}  // namespace detail
 
 //////////////////
 // GetSubKShape //
@@ -40,8 +40,8 @@ struct GetSubKShape {
       typename DimensionList::template left<DimensionList::size - 1>;
   using type = decltype(get_k_shape_from_dimension_list(SubdimensionList()));
 };
-}
-}  // end namespace detail::k_shape
+}  // namespace k_shape
+}  // namespace detail
 
 ////////////
 // KShape //
@@ -51,8 +51,8 @@ namespace detail {
 namespace k_shape {
 
 struct k_shape_tag {};
-}
-}  // end namespace detail::k_shape
+}  // namespace k_shape
+}  // namespace detail
 
 template <IndexInteger... Dimensions>
 class KShape : KSequence<detail::k_shape::k_shape_tag,
@@ -134,7 +134,7 @@ auto get_k_shape_type(fatal::constant_sequence<IndexInteger, Extents...>) {
 template <class... Extents>
 using GetKShapeType = decltype(
     get_k_shape_type(get_dimensionality_sequence(std::declval<Extents>()...)));
-}
+}  // namespace k_shape
 }  // end namespace detail
 
 /////////////////////////
@@ -170,8 +170,8 @@ void set_dynamic_k_shape_extents(Index<N>& dynamic_extents,
   dynamic_extents[I] = extent_first;
   set_dynamic_k_shape_extents<I + 1>(dynamic_extents, extents_rest...);
 }
-}
-}  // end namespace detail::k_shape
+}  // namespace k_shape
+}  // namespace detail
 
 //////////////////
 // make_k_shape //
@@ -192,5 +192,5 @@ auto make_k_shape(Extents... extents) {
 
 template <class... Extents>
 using KShapeFromExtents = decltype(make_k_shape(std::declval<Extents>()...));
-}
-}  // end namespace
+}  // namespace k_array
+}  // namespace echo

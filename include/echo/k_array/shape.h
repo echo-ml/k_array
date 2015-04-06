@@ -157,7 +157,7 @@ struct IsStaticStrideImpl<I, Shape, StaticStrideType::Subshape>
     : std::integral_constant<bool,
                              get<I>(shape_traits::stride_sequence<Shape>()) !=
                                  Stride::kDynamic> {};
-}
+}  // namespace shape
 }  // end namespace detail
 
 template <int I, class Shape>
@@ -236,7 +236,7 @@ template <int I, class Shape, CONCEPT_REQUIRES(I != 0)>
 IndexInteger get_num_elements_impl(const Shape& shape) {
   return get_extent<I>(shape) * get_num_elements_impl<I - 1>(shape);
 }
-}
+}  // namespace shape
 }  // end namespace detail
 
 template <class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() &&
@@ -277,7 +277,7 @@ IndexInteger get_1d_index_impl(const Shape& shape, IndexInteger i,
                                Indexes... i_rest) {
   return get_stride<I>(shape) * i + get_1d_index_impl<I + 1>(shape, i_rest...);
 }
-}
+}  // namespace shape
 }  // end namespace detail
 
 template <class Shape, class... Indexes,
@@ -351,7 +351,7 @@ template <class Shape1, class Shape2,
 constexpr bool are_shapes_statically_unequal() {
   return false;
 }
-}
+}  // namespace shape
 }  // end namespace detail
 
 /////////////////////////////////
@@ -412,7 +412,7 @@ template <class Shape1, class Shape2,
 constexpr bool are_shapes_statically_equal() {
   return false;
 }
-}
+}  // namespace shape
 }  // end namespace detail
 
 //////////////////////
@@ -434,7 +434,7 @@ bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
   return get_extent<I>(shape1) == get_extent<I>(shape2) &&
          are_shapes_equal<I + 1>(shape1, shape2);
 }
-}
+}  // namespace shape
 }  // end namespace detail
 
 ////////////////
@@ -499,5 +499,5 @@ template <
 bool operator!=(const Shape1& lhs, const Shape2& rhs) {
   return !(lhs == rhs);
 }
-}
-}  // end namespace
+}  // namespace k_array
+}  // namespace echo

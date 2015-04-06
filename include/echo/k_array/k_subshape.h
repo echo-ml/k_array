@@ -14,7 +14,7 @@ namespace detail {
 namespace k_subshape {
 
 struct k_stride_tag {};
-}
+}  // namespace k_subshape
 }  // end namespace detail
 
 template <class Shape, IndexInteger... Strides>
@@ -47,5 +47,5 @@ class KSubshape : public Shape,
 
   const auto& dynamic_strides() const { return StrideContainer::extents(); }
 };
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

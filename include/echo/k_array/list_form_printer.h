@@ -75,7 +75,7 @@ void print_inner_k_array(int offset, const ListFormPrinter& list_form_printer,
   }
   stream << list_form_printer.close_bracket();
 }
-}
+}  // namespace list_form_printer
 }  // end namespace detail
 
 template <class KArray, CONCEPT_REQUIRES(concept::k_array<KArray>())>
@@ -86,5 +86,5 @@ inline std::ostream& operator<<(const ListFormPrinter& list_form_printer,
                                                     k_array);
   return list_form_printer.stream();
 }
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

@@ -164,5 +164,5 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
 
   const Shape& shape() const { return static_cast<const Shape&>(*this); }
 };
-}
-} 
+}  // namespace k_array
+}  // namespace echo 

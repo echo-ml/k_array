@@ -4,20 +4,18 @@
 #include <echo/k_array/shaped_expression.h>
 #include <utility>
 
-namespace echo { namespace k_array {
+namespace echo {
+namespace k_array {
 
 ////////////////
 // is_k_array //
 ////////////////
 
-TICK_TRAIT(is_k_array)
-{
-  template<class T>
-  auto requires_(const T& k_array) -> tick::valid<
-      decltype(k_array.data())
-    , decltype(k_array.shape())
-    , is_true<is_shape<decltype(k_array.shape())>>
-  >;
+TICK_TRAIT(is_k_array) {
+  template <class T>
+  auto requires_(const T& k_array)
+      ->tick::valid<decltype(k_array.data()), decltype(k_array.shape()),
+                    is_true<is_shape<decltype(k_array.shape())>>>;
 };
 
 ////////////////////
@@ -26,15 +24,17 @@ TICK_TRAIT(is_k_array)
 
 namespace k_array_traits {
 
-template<class KArray>
+template <class KArray>
 using Pointer = decltype(std::declval<KArray>().data());
 
-template<class KArray>
-using Shape = typename std::decay<decltype(std::declval<KArray>().shape())>::type;
+template <class KArray>
+using Shape =
+    typename std::decay<decltype(std::declval<KArray>().shape())>::type;
 
-template<class KArray>
+template <class KArray>
 using Dimensionality = typename Shape<KArray>::Dimensionality;
 
-} //end namespace k_array_traits
+}  // end namespace k_array_traits
 
-}} //end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo

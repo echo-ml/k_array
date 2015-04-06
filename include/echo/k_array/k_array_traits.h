@@ -25,5 +25,5 @@ using extent_type =
 
 template <class KArray>
 using dimensionality = shape_traits::dimensionality<shape_type<KArray>>;
-}
-}
+}  // namespace k_array_traits
+}  // namespace echo

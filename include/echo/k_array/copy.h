@@ -13,5 +13,6 @@ void copy(const SourceKArray& source, DestinationKArray&& destination) {
   ECHO_ASSERT(source.shape() == destination.shape());
   std::copy(all_cbegin(source), all_cend(source), all_begin(destination));
 }
-}
-}  // end namesapce echo::k_array
+
+}  // namespace k_array
+}  // namespace echo

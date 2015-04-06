@@ -13,7 +13,6 @@ namespace k_array {
 
 namespace detail {
 namespace slice {
-
 template <int I, class Shape>
 constexpr int count_dynamic_strides() {
   return 0;
@@ -36,7 +35,7 @@ template <
 constexpr int count_dynamic_strides() {
   return count_dynamic_strides<I + 1, Shape, ExtentsRest...>();
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 ////////////////////////////
@@ -45,7 +44,6 @@ constexpr int count_dynamic_strides() {
 
 namespace detail {
 namespace slice {
-
 template <int StrideIndex, int DynamicStrideIndex, class PrevStride,
           class Shape, int N>
 void set_contiguous_strides(const Shape&, PrevStride,
@@ -84,7 +82,7 @@ void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
       shape, prev_stride * get_extent<StrideIndex>(shape), dynamic_strides,
       extents_rest...);
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 //////////////////////////
@@ -93,7 +91,6 @@ void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
 
 namespace detail {
 namespace slice {
-
 template <int StrideIndex, int DynamicStrideIndex, class Shape, int N>
 void set_subshape_strides(const Shape&, Index<N>& dynamic_strides) {}
 
@@ -128,7 +125,7 @@ void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
   set_subshape_strides<StrideIndex + 1, DynamicStrideIndex + 1>(
       shape, dynamic_strides, extents_rest...);
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 /////////////////
@@ -137,7 +134,6 @@ void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
 
 namespace detail {
 namespace slice {
-
 template <class Shape, class... SliceExtents, int N,
           CONCEPT_REQUIRES(concept::contiguous_shape<Shape>())>
 void set_strides(const Shape& shape, Index<N>& dynamic_strides,
@@ -152,7 +148,7 @@ void set_strides(const Shape& shape, Index<N>& dynamic_strides,
                  SliceExtents... slice_extents) {
   set_subshape_strides<0, 0>(shape, dynamic_strides, slice_extents...);
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 /////////////////////////
@@ -161,7 +157,6 @@ void set_strides(const Shape& shape, Index<N>& dynamic_strides,
 
 namespace detail {
 namespace slice {
-
 template <int I, class Shape>
 auto get_stride_sequence() {
   return fatal::constant_sequence<IndexInteger>();
@@ -200,7 +195,7 @@ auto get_stride_sequence() {
   using Tail = decltype(get_stride_sequence<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<Stride::kDynamic>();
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 ///////////////////////////
@@ -209,7 +204,6 @@ auto get_stride_sequence() {
 
 namespace detail {
 namespace slice {
-
 template <int I, class Shape>
 constexpr int count_dynamic_extents() {
   return 0;
@@ -247,7 +241,7 @@ template <
 constexpr int count_dynamic_extents() {
   return count_dynamic_extents<I + 1, Shape, ExtentsRest...>();
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 /////////////////////////
@@ -256,7 +250,6 @@ constexpr int count_dynamic_extents() {
 
 namespace detail {
 namespace slice {
-
 template <int ExtentIndex, int DynamicExtentIndex, class Shape, int N>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents) {}
 
@@ -328,7 +321,7 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
   set_dynamic_extents<ExtentIndex + 1, DynamicExtentIndex + 1>(
       shape, dynamic_extents, extents_rest...);
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 /////////////////////
@@ -337,7 +330,6 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
 
 namespace detail {
 namespace slice {
-
 template <int I, class Shape>
 auto reshape_extents() {
   return fatal::constant_sequence<IndexInteger>();
@@ -386,7 +378,7 @@ auto reshape_extents() {
   using Tail = decltype(reshape_extents<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<ExtentFirst::value>();
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 /////////////
@@ -401,7 +393,7 @@ auto reshape_impl(const Index<N>& dynamic_extents,
                   fatal::constant_sequence<IndexInteger, Dimensions...>) {
   return KShape<Dimensions...>(dynamic_extents);
 }
-}
+}  // namespace slice
 }  // end namespace detail
 
 template <class Shape, class... SliceExtents,
@@ -429,8 +421,8 @@ auto slice_impl(const Shape& shape, const Index<N>& dynamic_strides,
                 fatal::constant_sequence<IndexInteger, Strides...>) {
   return KSubshape<Shape, Strides...>(shape, dynamic_strides);
 }
-}
-}  // end namesapce detail
+}  // namespace slice
+}  // namespace detail
 
 template <class Shape, class... SliceExtents,
           CONCEPT_REQUIRES(concept::shape<Shape>())>
@@ -452,5 +444,6 @@ auto slice(const Shape& shape, SliceExtents... slice_extents) {
   return detail::slice::slice_impl(new_shape, dynamic_strides,
                                    StrideSequence());
 }
-}
-}  // end namespace echo::k_array
+
+}  // namespace k_array
+}  // namespace echo

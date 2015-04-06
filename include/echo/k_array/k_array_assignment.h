@@ -24,5 +24,5 @@ MAKE_ASSIGNMENT(/*none*/, /*none*/)
 MAKE_ASSIGNMENT(Const, const)
 
 #undef MAKE_ASSIGNMENT
-}
-}  // end namespace echo::k_array
+}  // namespace k_array
+}  // namespace echo
