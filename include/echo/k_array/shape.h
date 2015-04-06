@@ -4,7 +4,6 @@
 #include <echo/k_array/shape_traits.h>
 #include <echo/k_array/concept.h>
 #include <echo/concept.h>
-#include <echo/enable_if.h>
 #include <echo/const_algorithm.h>
 #include <echo/index.h>
 #include <echo/assert.h>
@@ -492,8 +491,7 @@ constexpr std::true_type operator!=(const Shape1& lhs, const Shape2& rhs) {
 }
 
 template <
-    class Shape1, class Shape2, enable_if<is_shape<Shape1>> = 0,
-    enable_if<is_shape<Shape2>> = 0,
+    class Shape1, class Shape2,
     CONCEPT_REQUIRES(
         concept::shape<Shape1>() && concept::shape<Shape2>() &&
         std::is_same<decltype(std::declval<Shape1>() == std::declval<Shape2>()),

@@ -139,9 +139,7 @@ namespace detail {
 namespace slice {
 
 template <class Shape, class... SliceExtents, int N,
-          CONCEPT_REQUIRES(concept::contiguous_shape<Shape>())
-          // , enable_if<is_contiguous_shape<Shape>> = 0
-          >
+          CONCEPT_REQUIRES(concept::contiguous_shape<Shape>())>
 void set_strides(const Shape& shape, Index<N>& dynamic_strides,
                  SliceExtents... slice_extents) {
   set_contiguous_strides<0, 0>(shape, StaticIndex<1>(), dynamic_strides,
@@ -322,8 +320,7 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
 template <
     int ExtentIndex, int DynamicExtentIndex, class Shape, class ExtentFirst,
     class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, IndexInteger>())
-    >
+    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, IndexInteger>())>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {

@@ -30,8 +30,10 @@ class KSubshape : public Shape,
  public:
   using StrideSequence = StaticIndex<Strides...>;
 
-  template <class... StrideExtents,
-            enable_if<std::is_convertible<StrideExtents, IndexInteger>...> = 0>
+  template <
+      class... StrideExtents,
+      CONCEPT_REQUIRES(const_algorithm::and_(fatal::constant_sequence<
+          bool, std::is_convertible<StrideExtents, IndexInteger>::value...>()))>
   explicit KSubshape(const Shape& shape, StrideExtents... stride_extents)
       : Shape(shape), StrideContainer(stride_extents...) {}
 

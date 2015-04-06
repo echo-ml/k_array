@@ -34,4 +34,5 @@ struct Slice {
   using Null = StaticIndex<kNull>;
 };
 
-}}
+}  // namespace k_array
+}  // namespace echo
