@@ -43,6 +43,12 @@ TEST_CASE("k_array") {
     REQUIRE(k_array2(1, 0, 0) == 1);
   }
 
+  SECTION("copy_construct") {
+    auto k_array_copy = k_array1;
+  }
+  SECTION("copy_construct other_allocator") {
+    KArray<double, Shape1, SimdAllocator<double>> k_array_copy(k_array1);
+  }
   SECTION("move") {
     k_array2 = std::move(k_array1);
     REQUIRE(k_array2(1, 0, 0) == 1);

@@ -88,13 +88,13 @@ class KArray : Shape,
   template <class OtherT, class OtherAllocator,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>())>
   void copy_construct(const KArray<OtherT, Shape, OtherAllocator>& other) {
-    auto this_num_elements = get_num_elements(*this);
     auto other_num_elements = get_num_elements(other);
-
     static_cast<Shape&>(*this) = other.shape();
 
+    _data = this->allocate(other_num_elements);
+
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
-         other._data, std::next(other._data, other_num_elements),
+         other.data(), std::next(other.data(), other_num_elements),
          memory_backend_traits::memory_backend_tag<Allocator>(), _data);
   }
 
@@ -115,7 +115,7 @@ class KArray : Shape,
     static_cast<Shape&>(*this) = other.shape();
 
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
-         other._data, std::next(other._data, other_num_elements),
+         other.data(), std::next(other.data(), other_num_elements),
          memory_backend_traits::memory_backend_tag<Allocator>(), _data);
 
     return *this;
