@@ -27,6 +27,4 @@ using echo::k_array::Slice;
 using echo::k_array::Stride;
 using echo::k_array::ListForm;
 
-namespace k_array_traits = k_array::k_array_traits;
-
 } //end namespace echo

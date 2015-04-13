@@ -177,7 +177,9 @@ void set_dynamic_k_shape_extents(Index<N>& dynamic_extents,
 // make_k_shape //
 //////////////////
 
-template <class... Extents>
+template <class... Extents,
+          CONCEPT_REQUIRES(const_algorithm::and_(
+              fatal::constant_sequence<bool, concept::extent<Extents>()...>()))>
 auto make_k_shape(Extents... extents) {
   using namespace detail::k_shape;
   using Result = GetKShapeType<Extents...>;

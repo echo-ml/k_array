@@ -107,7 +107,9 @@ constexpr IndexInteger get_num_dimensions() {
 // is_static_extent //
 //////////////////////
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape<Shape>() &&
+                           (I < get_num_dimensions<Shape>()))>
 constexpr bool is_static_extent() {
   return get<I>(shape_traits::dimensionality<Shape>()) != Dimension::kDynamic;
 }
@@ -116,15 +118,19 @@ constexpr bool is_static_extent() {
 // get_extent //
 ////////////////
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() &&
-                                               is_static_extent<I, Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape<Shape>() &&
+                           (I < get_num_dimensions<Shape>()) &&
+                           is_static_extent<I, Shape>())>
 constexpr auto get_extent(const Shape& shape)
     -> decltype(get<I>(shape_traits::dimensionality<Shape>())) {
   return {};
 }
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() &&
-                                               !is_static_extent<I, Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape<Shape>() &&
+                           (I < get_num_dimensions<Shape>()) &&
+                           !is_static_extent<I, Shape>())>
 IndexInteger get_extent(const Shape& shape) {
   using namespace const_algorithm;
   constexpr int dynamic_index = count(

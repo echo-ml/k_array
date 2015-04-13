@@ -3,6 +3,7 @@
 #include <echo/static_allocator.h>
 #include <echo/k_array/k_array_accessor.h>
 #include <echo/k_array/k_array_assignment.h>
+#include <echo/k_array/k_array_traits.h>
 #include <echo/memory.h>
 
 #include <memory>
