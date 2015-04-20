@@ -63,7 +63,7 @@ struct IsStaticStrideImpl<I, Shape, true>
 
 ECHO_MAKE_TYPE_QUERIER(StrideSequence)
 
-}  // namespace shape
+}  // namespace shape_traits
 }  // end namespace detail
 
 template <int I, class Shape>

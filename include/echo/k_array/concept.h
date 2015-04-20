@@ -21,8 +21,8 @@ template <IndexInteger N, CONCEPT_REQUIRES(N > 1)>
 auto static_extent_impl(StaticIndex<N>) -> std::true_type;
 
 auto static_extent_impl(...) -> std::false_type;
-}
-}
+}  // namespace concept
+}  // namespace detail
 
 template <class T>
 constexpr bool static_extent() {
@@ -142,8 +142,8 @@ struct KShape : Concept {
   auto require(K&&, T && )
       -> list<shape<T>(), T::Dimensionality::size == K::value>;
 };
-}
-}
+}  // namespace concept
+}  // namespace detail
 
 template <int K, class T>
 constexpr bool k_shape() {
@@ -207,8 +207,8 @@ struct WritableData : Concept {
   template <class T>
   auto require(T&& x) -> list<echo::concept::writable<decltype(x.data())>()>;
 };
-}
-}
+}  // namespace concept
+}  // namespace detail
 
 template <class T>
 constexpr bool writable_data() {
