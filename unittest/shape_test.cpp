@@ -187,7 +187,7 @@ TEST_CASE("shape") {
         decltype(S1() != S4())
       , std::true_type
     >();
-    
+
     REQUIRE(S3() == S5(2));
     REQUIRE(!(S3() != S5(2)));
 

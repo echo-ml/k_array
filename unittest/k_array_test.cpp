@@ -79,7 +79,7 @@ TEST_CASE("printers") {
   using Shape1 = KShape<Dimension::kDynamic>;
   using Shape2 = KShape<Dimension::kDynamic, Dimension::kDynamic>;
   using Shape3 = KShape<Dimension::kDynamic, Dimension::kDynamic, Dimension::kDynamic>;
-  
+
   KArray<double, Shape1> k_array1(Shape1(3));
   KArray<double, Shape2> k_array2(Shape2(3, 2));
   KArray<double, Shape3> k_array3(Shape3(4, 3, 2));

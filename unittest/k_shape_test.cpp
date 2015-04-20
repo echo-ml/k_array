@@ -1,3 +1,4 @@
+#include <echo/k_array/concept.h>
 #include <echo/k_array/k_shape.h>
 #include <echo/test.h>
 #include <catch.hpp>
@@ -9,8 +10,8 @@ TEST_CASE("k_shape") {
   KShape<3, 10, Dimension::kDynamic, 7> shape1(4);
 
   SECTION("shape functions") {
-    REQUIRE(is_contiguous_shape<decltype(shape1)>());
-    REQUIRE(is_contiguous_shape<KShape<3>>());
+    REQUIRE(k_array::concept::contiguous_shape<decltype(shape1)>());
+    REQUIRE(k_array::concept::contiguous_shape<KShape<3>>());
     REQUIRE(get_num_elements(shape1) == 840);
   }
   SECTION("sub_k_shape") {

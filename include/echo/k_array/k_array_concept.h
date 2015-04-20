@@ -7,21 +7,11 @@
 namespace echo {
 namespace k_array {
 
-////////////////
-// is_k_array //
-////////////////
-
-TICK_TRAIT(is_k_array) {
-  template <class T>
-  auto requires_(const T& k_array)
-      ->tick::valid<decltype(k_array.data()), decltype(k_array.shape()),
-                    is_true<is_shape<decltype(k_array.shape())>>>;
-};
-
 ////////////////////
 // k_array_traits //
 ////////////////////
 
+//depricated
 namespace k_array_traits {
 
 template <class KArray>

@@ -38,6 +38,6 @@ TEST_CASE("k_array copy") {
           , all_cbegin(k_array_view3)
         )
     );
-    
+
   }
 }

@@ -17,7 +17,6 @@ using echo::k_array::make_k_shape;
 using echo::k_array::KSubshape;
 using echo::k_array::KArray;
 using echo::k_array::KArrayView;
-using echo::k_array::is_k_array;
 using echo::k_array::KArrayAssignment;
 using echo::k_array::get_extent;
 using echo::k_array::get_stride;

@@ -19,19 +19,19 @@ constexpr int count_dynamic_strides() {
 }
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>::value)>
 constexpr int count_dynamic_strides();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>::value)>
 constexpr int count_dynamic_strides() {
-  return !is_static_stride<I, Shape>() +
+  return !shape_traits::static_stride<I, Shape>() +
          count_dynamic_strides<I + 1, Shape, ExtentsRest...>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, Slice::Null>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              std::is_same<ExtentFirst, Slice::Null>::value)>
 constexpr int count_dynamic_strides() {
   return count_dynamic_strides<I + 1, Shape, ExtentsRest...>();
 }
@@ -51,16 +51,16 @@ void set_contiguous_strides(const Shape&, PrevStride,
 
 template <int StrideIndex, int DynamicStrideIndex, class PrevStride,
           class Shape, class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>() &&
-                           !is_static_stride<StrideIndex, Shape>())>
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>::value &&
+                           !shape_traits::static_stride<StrideIndex, Shape>())>
 void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
                             Index<N>& dynamic_strides, ExtentFirst extent_first,
                             ExtentsRest... extents_rest);
 
 template <int StrideIndex, int DynamicStrideIndex, class PrevStride,
           class Shape, class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>() ||
-                           is_static_stride<StrideIndex, Shape>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>::value ||
+                           shape_traits::static_stride<StrideIndex, Shape>())>
 void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
                             Index<N>& dynamic_strides, ExtentFirst extent_first,
                             ExtentsRest... extents_rest) {
@@ -69,11 +69,11 @@ void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
       extents_rest...);
 }
 
-template <
-    int StrideIndex, int DynamicStrideIndex, class PrevStride, class Shape,
-    class ExtentFirst, class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, Slice::Null>() &&
-                                   !is_static_stride<StrideIndex, Shape>())>
+template <int StrideIndex, int DynamicStrideIndex, class PrevStride,
+          class Shape, class ExtentFirst, class... ExtentsRest, int N,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !std::is_same<ExtentFirst, Slice::Null>::value &&
+              !shape_traits::static_stride<StrideIndex, Shape>())>
 void set_contiguous_strides(const Shape& shape, PrevStride prev_stride,
                             Index<N>& dynamic_strides, ExtentFirst extent_first,
                             ExtentsRest... extents_rest) {
@@ -96,16 +96,16 @@ void set_subshape_strides(const Shape&, Index<N>& dynamic_strides) {}
 
 template <int StrideIndex, int DynamicStrideIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>() &&
-                           !is_static_stride<StrideIndex, Shape>())>
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, Slice::Null>::value &&
+                           !shape_traits::static_stride<StrideIndex, Shape>())>
 void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
                           ExtentFirst extent_first,
                           ExtentsRest... extents_rest);
 
 template <int StrideIndex, int DynamicStrideIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>() ||
-                           is_static_stride<StrideIndex, Shape>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>::value ||
+                           shape_traits::static_stride<StrideIndex, Shape>())>
 void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
                           ExtentFirst extent_first,
                           ExtentsRest... extents_rest) {
@@ -113,11 +113,11 @@ void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
       shape, dynamic_strides, extents_rest...);
 }
 
-template <
-    int StrideIndex, int DynamicStrideIndex, class Shape, class ExtentFirst,
-    class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, Slice::Null>() &&
-                                   !is_static_stride<StrideIndex, Shape>())>
+template <int StrideIndex, int DynamicStrideIndex, class Shape,
+          class ExtentFirst, class... ExtentsRest, int N,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !std::is_same<ExtentFirst, Slice::Null>::value &&
+              !shape_traits::static_stride<StrideIndex, Shape>())>
 void set_subshape_strides(const Shape& shape, Index<N>& dynamic_strides,
                           ExtentFirst extent_first,
                           ExtentsRest... extents_rest) {
@@ -159,38 +159,38 @@ namespace detail {
 namespace slice {
 template <int I, class Shape>
 auto get_stride_sequence() {
-  return fatal::constant_sequence<IndexInteger>();
+  return fatal::constant_sequence<index_t>();
 }
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(is_static_stride<I, Shape>() &&
-                           !std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(shape_traits::static_stride<I, Shape>() &&
+                           !std::is_same<ExtentFirst, Slice::Null>::value)>
 auto get_stride_sequence();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(!is_static_stride<I, Shape>() &&
-                           !std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(!shape_traits::static_stride<I, Shape>() &&
+                           !std::is_same<ExtentFirst, Slice::Null>::value)>
 auto get_stride_sequence();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>::value)>
 auto get_stride_sequence() {
   return get_stride_sequence<I + 1, Shape, ExtentsRest...>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(is_static_stride<I, Shape>() &&
-                                   !std::is_same<ExtentFirst, Slice::Null>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              shape_traits::static_stride<I, Shape>() &&
+              !std::is_same<ExtentFirst, Slice::Null>::value)>
 auto get_stride_sequence() {
   using Tail = decltype(get_stride_sequence<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<get_static_stride<I, Shape>()>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(!is_static_stride<I, Shape>() &&
-                                   !std::is_same<ExtentFirst, Slice::Null>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !shape_traits::static_stride<I, Shape>() &&
+              !std::is_same<ExtentFirst, Slice::Null>::value)>
 auto get_stride_sequence() {
   using Tail = decltype(get_stride_sequence<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<Stride::kDynamic>();
@@ -210,34 +210,34 @@ constexpr int count_dynamic_extents() {
 }
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value)>
 constexpr int count_dynamic_extents();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, IndexInteger>() &&
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, index_t>::value &&
                            (ExtentFirst::value > 0 ||
-                            std::is_same<ExtentFirst, Slice::Null>()))>
+                            std::is_same<ExtentFirst, Slice::Null>::value))>
 constexpr int count_dynamic_extents();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, IndexInteger>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, index_t>::value)>
 constexpr int count_dynamic_extents() {
   return 1 + count_dynamic_extents<I + 1, Shape, ExtentsRest...>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, Slice::Full>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              std::is_same<ExtentFirst, Slice::Full>::value)>
 constexpr int count_dynamic_extents() {
-  return !is_static_extent<I, Shape>() +
+  return !shape_traits::static_extent<I, Shape>() +
          count_dynamic_extents<I + 1, Shape, ExtentsRest...>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, IndexInteger>() &&
-                                   (ExtentFirst::value > 0 ||
-                                    std::is_same<ExtentFirst, Slice::Null>()))>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !std::is_same<ExtentFirst, index_t>::value &&
+              (ExtentFirst::value > 0 ||
+               std::is_same<ExtentFirst, Slice::Null>::value))>
 constexpr int count_dynamic_extents() {
   return count_dynamic_extents<I + 1, Shape, ExtentsRest...>();
 }
@@ -255,28 +255,28 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents) {}
 
 template <int ExtentIndex, int DynamicExtentIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, IndexInteger>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, index_t>::value)>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first, ExtentsRest... extents_rest);
 
 template <int ExtentIndex, int DynamicExtentIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, IndexInteger>() &&
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, index_t>::value &&
                            (ExtentFirst::value > 0 ||
-                            std::is_same<ExtentFirst, Slice::Null>()))>
+                            std::is_same<ExtentFirst, Slice::Null>::value))>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first, ExtentsRest... extents_rest);
 template <int ExtentIndex, int DynamicExtentIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>() &&
-                           !is_static_extent<ExtentIndex, Shape>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value &&
+                           !shape_traits::static_extent<ExtentIndex, Shape>())>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first, ExtentsRest... extents_rest);
 
 template <int ExtentIndex, int DynamicExtentIndex, class Shape,
           class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>() &&
-                           is_static_extent<ExtentIndex, Shape>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value&&
+                               shape_traits::static_extent<ExtentIndex, Shape>())>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {
@@ -284,11 +284,11 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
       shape, dynamic_extents, extents_rest...);
 }
 
-template <
-    int ExtentIndex, int DynamicExtentIndex, class Shape, class ExtentFirst,
-    class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, Slice::Full>() &&
-                                   !is_static_extent<ExtentIndex, Shape>())>
+template <int ExtentIndex, int DynamicExtentIndex, class Shape,
+          class ExtentFirst, class... ExtentsRest, int N,
+          CONCEPT_REQUIRES_REDECLARATION(
+              std::is_same<ExtentFirst, Slice::Full>::value &&
+              !shape_traits::static_extent<ExtentIndex, Shape>())>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {
@@ -297,12 +297,12 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
       shape, dynamic_extents, extents_rest...);
 }
 
-template <
-    int ExtentIndex, int DynamicExtentIndex, class Shape, class ExtentFirst,
-    class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, IndexInteger>() &&
-                                   (ExtentFirst::value > 0 ||
-                                    std::is_same<ExtentFirst, Slice::Null>()))>
+template <int ExtentIndex, int DynamicExtentIndex, class Shape,
+          class ExtentFirst, class... ExtentsRest, int N,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !std::is_same<ExtentFirst, index_t>::value &&
+              (ExtentFirst::value > 0 ||
+               std::is_same<ExtentFirst, Slice::Null>::value))>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {
@@ -313,7 +313,7 @@ void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
 template <
     int ExtentIndex, int DynamicExtentIndex, class Shape, class ExtentFirst,
     class... ExtentsRest, int N,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, IndexInteger>())>
+    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, index_t>::value)>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {
@@ -332,39 +332,39 @@ namespace detail {
 namespace slice {
 template <int I, class Shape>
 auto reshape_extents() {
-  return fatal::constant_sequence<IndexInteger>();
+  return fatal::constant_sequence<index_t>();
 }
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value)>
 auto reshape_extents();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Null>::value)>
 auto reshape_extents();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, IndexInteger>() &&
+          CONCEPT_REQUIRES(!std::is_same<ExtentFirst, index_t>::value &&
                            (ExtentFirst::value > 0))>
 auto reshape_extents();
 
 template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, IndexInteger>())>
+          CONCEPT_REQUIRES(std::is_same<ExtentFirst, index_t>::value)>
 auto reshape_extents() {
   using Tail = decltype(reshape_extents<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<Dimension::kDynamic>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, Slice::Null>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              std::is_same<ExtentFirst, Slice::Null>::value)>
 auto reshape_extents() {
   return reshape_extents<I + 1, Shape, ExtentsRest...>();
 }
 
-template <
-    int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, Slice::Full>())>
+template <int I, class Shape, class ExtentFirst, class... ExtentsRest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              std::is_same<ExtentFirst, Slice::Full>::value)>
 auto reshape_extents() {
   using Tail = decltype(reshape_extents<I + 1, Shape, ExtentsRest...>());
   return typename Tail::template push_front<get<I>(Dimensionality<Shape>())>();
@@ -372,7 +372,7 @@ auto reshape_extents() {
 
 template <
     int I, class Shape, class ExtentFirst, class... ExtentsRest,
-    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, IndexInteger>() &&
+    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, index_t>::value &&
                                    (ExtentFirst::value > 0))>
 auto reshape_extents() {
   using Tail = decltype(reshape_extents<I + 1, Shape, ExtentsRest...>());
@@ -388,9 +388,9 @@ auto reshape_extents() {
 namespace detail {
 namespace slice {
 
-template <IndexInteger... Dimensions, int N>
+template <index_t... Dimensions, int N>
 auto reshape_impl(const Index<N>& dynamic_extents,
-                  fatal::constant_sequence<IndexInteger, Dimensions...>) {
+                  fatal::constant_sequence<index_t, Dimensions...>) {
   return KShape<Dimensions...>(dynamic_extents);
 }
 }  // namespace slice
@@ -416,9 +416,9 @@ auto reshape(const Shape& shape, SliceExtents... slice_extents) {
 namespace detail {
 namespace slice {
 
-template <class Shape, IndexInteger... Strides, int N>
+template <class Shape, index_t... Strides, int N>
 auto slice_impl(const Shape& shape, const Index<N>& dynamic_strides,
-                fatal::constant_sequence<IndexInteger, Strides...>) {
+                fatal::constant_sequence<index_t, Strides...>) {
   return KSubshape<Shape, Strides...>(shape, dynamic_strides);
 }
 }  // namespace slice

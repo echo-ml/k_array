@@ -39,7 +39,7 @@ class KArray : Shape,
   KArray(const KArray& other) : Allocator(other) { copy_construct(other); }
 
   template <class OtherT, class OtherAllocator,
-            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>())>
+            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   KArray(const KArray<OtherT, Shape, OtherAllocator>& other) {
     copy_construct(other);
   }
@@ -54,7 +54,7 @@ class KArray : Shape,
   KArray& operator=(const KArray& other) { return copy_assign(other); }
 
   template <class OtherT, class OtherAllocator,
-            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>())>
+            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   KArray& operator=(const KArray<OtherT, Shape, OtherAllocator>& other) {
     return copy_assign(other);
   }
@@ -87,7 +87,7 @@ class KArray : Shape,
 
  private:
   template <class OtherT, class OtherAllocator,
-            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>())>
+            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   void copy_construct(const KArray<OtherT, Shape, OtherAllocator>& other) {
     auto other_num_elements = get_num_elements(other);
     static_cast<Shape&>(*this) = other.shape();
@@ -100,7 +100,7 @@ class KArray : Shape,
   }
 
   template <class OtherT, class OtherAllocator,
-            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>())>
+            CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   KArray& copy_assign(const KArray<OtherT, Shape, OtherAllocator>& other) {
     if (this == std::addressof(other)) return *this;
 
@@ -166,4 +166,4 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
   const Shape& shape() const { return static_cast<const Shape&>(*this); }
 };
 }  // namespace k_array
-}  // namespace echo 
+}  // namespace echo
