@@ -273,10 +273,11 @@ template <int ExtentIndex, int DynamicExtentIndex, class Shape,
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first, ExtentsRest... extents_rest);
 
-template <int ExtentIndex, int DynamicExtentIndex, class Shape,
-          class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value&&
-                               shape_traits::static_extent<ExtentIndex, Shape>())>
+template <
+    int ExtentIndex, int DynamicExtentIndex, class Shape, class ExtentFirst,
+    class... ExtentsRest, int N,
+    CONCEPT_REQUIRES(std::is_same<ExtentFirst, Slice::Full>::value&&
+                         shape_traits::static_extent<ExtentIndex, Shape>())>
 void set_dynamic_extents(const Shape& shape, Index<N>& dynamic_extents,
                          ExtentFirst extent_first,
                          ExtentsRest... extents_rest) {

@@ -115,10 +115,10 @@ auto get_dimensionality_sequence(ExtentFirst extent_first,
       typename DimensionalityRest::template push_front<Dimension::kDynamic>();
 }
 
-template <class ExtentFirst, class... ExtentsRest,
-          CONCEPT_REQUIRES_REDECLARATION(
-              !std::is_same<ExtentFirst, index_t>::value &&
-              ExtentFirst::value > 0)>
+template <
+    class ExtentFirst, class... ExtentsRest,
+    CONCEPT_REQUIRES_REDECLARATION(!std::is_same<ExtentFirst, index_t>::value &&
+                                   ExtentFirst::value > 0)>
 auto get_dimensionality_sequence(ExtentFirst extent_first,
                                  ExtentsRest... extents_rest) {
   using DimensionalityRest =
@@ -127,8 +127,8 @@ auto get_dimensionality_sequence(ExtentFirst extent_first,
 }
 
 template <index_t... Extents>
-auto get_k_shape_type(fatal::constant_sequence<index_t, Extents...>) 
-  -> KShape<Extents...>;
+auto get_k_shape_type(fatal::constant_sequence<index_t, Extents...>)
+    -> KShape<Extents...>;
 
 template <class... Extents>
 using GetKShapeType = decltype(
@@ -160,9 +160,9 @@ void set_dynamic_k_shape_extents(Index<N>& dynamic_extents,
   set_dynamic_k_shape_extents<I>(dynamic_extents, extents_rest...);
 }
 
-template <int I, class ExtentFirst, class... ExtentsRest, int N,
-          CONCEPT_REQUIRES_REDECLARATION(
-              std::is_same<ExtentFirst, index_t>::value)>
+template <
+    int I, class ExtentFirst, class... ExtentsRest, int N,
+    CONCEPT_REQUIRES_REDECLARATION(std::is_same<ExtentFirst, index_t>::value)>
 void set_dynamic_k_shape_extents(Index<N>& dynamic_extents,
                                  ExtentFirst extent_first,
                                  ExtentsRest... extents_rest) {

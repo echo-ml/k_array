@@ -110,10 +110,9 @@ namespace detail {
 namespace concept {
 struct ContiguousShape : Concept {
   template <class T>
-  auto require(T&& shape)
-      -> list<dimensionality<typename T::Dimensionality>(),
-              valid<decltype(shape.template dynamic_extent<0>())>(),
-              !subshape<T>()>;
+  auto require(T&& shape) -> list<
+      dimensionality<typename T::Dimensionality>(),
+      valid<decltype(shape.template dynamic_extent<0>())>(), !subshape<T>()>;
 };
 }  // namespace concept
 }  // namespace detail
@@ -136,17 +135,17 @@ constexpr bool shape() {
 // k_shape //
 /////////////
 
-namespace detail { namespace concept {
+namespace detail {
+namespace concept {
 struct KShape : Concept {
-  template<class K, class T>
-  auto require(K&&, T&&) -> list<
-    shape<T>(),
-    T::Dimensionality::size == K::value
-  >;
+  template <class K, class T>
+  auto require(K&&, T && )
+      -> list<shape<T>(), T::Dimensionality::size == K::value>;
 };
-}}
+}
+}
 
-template<int K, class T>
+template <int K, class T>
 constexpr bool k_shape() {
   return models<detail::concept::KShape, std::integral_constant<int, K>, T>();
 }
@@ -155,7 +154,7 @@ constexpr bool k_shape() {
 // contiguous_k_shape //
 ////////////////////////
 
-template<int K, class T>
+template <int K, class T>
 constexpr bool contiguous_k_shape() {
   return contiguous_shape<T>() && k_shape<K, T>();
 }
@@ -168,10 +167,9 @@ namespace detail {
 namespace concept {
 struct StaticShape : Concept {
   template <class T>
-  auto require(T && )
-      -> list<shape<T>(),
-              !const_algorithm::contains(typename T::Dimensionality(),
-                                         Dimension::Dynamic())>;
+  auto require(T && ) -> list<
+      shape<T>(), !const_algorithm::contains(typename T::Dimensionality(),
+                                             Dimension::Dynamic())>;
 };
 }  // namespace concept
 }  // namespace detail
@@ -203,16 +201,16 @@ constexpr bool shaped() {
 // writable_data //
 ///////////////////
 
-namespace detail { namespace concept {
+namespace detail {
+namespace concept {
 struct WritableData : Concept {
-  template<class T>
-  auto require(T&& x) -> list<
-      echo::concept::writable<decltype(x.data())>()
-  >;
+  template <class T>
+  auto require(T&& x) -> list<echo::concept::writable<decltype(x.data())>()>;
 };
-}}
+}
+}
 
-template<class T>
+template <class T>
 constexpr bool writable_data() {
   return models<detail::concept::WritableData, T>();
 }
@@ -245,9 +243,8 @@ namespace detail {
 namespace concept {
 struct ContiguousKArray : Concept {
   template <class KArray>
-  auto require(KArray&& x)
-      -> list<k_array<KArray>(),
-              contiguous_shape<uncvref_t<decltype(x.shape())>>()>;
+  auto require(KArray&& x) -> list<
+      k_array<KArray>(), contiguous_shape<uncvref_t<decltype(x.shape())>>()>;
 };
 }  // namespace concept
 }  // namespace detail

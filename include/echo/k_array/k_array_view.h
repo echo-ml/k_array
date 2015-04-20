@@ -3,7 +3,6 @@
 #include <echo/type_traits.h>
 #include <echo/k_array/k_array_accessor.h>
 #include <echo/k_array/k_array_assignment.h>
-#include <echo/k_array/k_array_concept.h>
 
 #include <iterator>
 
