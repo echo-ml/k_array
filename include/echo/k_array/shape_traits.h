@@ -26,7 +26,8 @@ using stride_sequence = typename Shape::StrideSequence;
 ////////////////////
 
 template <class Shape>
-constexpr index_t num_dimensions() {
+constexpr auto num_dimensions()
+    -> decltype(std::decay<Shape>::type::Dimensionality::size, index_t()) {
   return std::decay<Shape>::type::Dimensionality::size;
 }
 

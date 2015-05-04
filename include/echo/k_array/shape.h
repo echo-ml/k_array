@@ -362,8 +362,8 @@ bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
 
 template <class Shape1, class Shape2,
           CONCEPT_REQUIRES(
-              concept::shape<Shape1>() && concept::shape<Shape2>() &&
-              detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
+              concept::shape<Shape1>() && concept::shape<Shape2>()),
+              CONCEPT_REQUIRES(detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
 constexpr std::false_type operator==(const Shape1&, const Shape2&) {
   return {};
 }
@@ -379,8 +379,8 @@ template <class Shape1, class Shape2,
           CONCEPT_REQUIRES(
               concept::shape<Shape1>() && concept::shape<Shape2>() &&
               !(concept::static_shape<Shape1>() &&
-                concept::static_shape<Shape2>()) &&
-              !detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
+                concept::static_shape<Shape2>())),
+              CONCEPT_REQUIRES(!detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
 bool operator==(const Shape1& shape1, const Shape2& shape2) {
   return detail::shape::are_shapes_equal<0>(shape1, shape2);
 }
