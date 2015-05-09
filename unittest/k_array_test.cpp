@@ -63,7 +63,8 @@ TEST_CASE("slice") {
 
   type_equal<
       decltype(subshape1)
-    , KSubshape<KShape<Dimension::kDynamic, 2>, 1, Stride::kDynamic>
+    , KSubshape<KShape<Dimension::kDynamic, 2>, KShapeStrides<1, Stride::kDynamic>>
+    // , KSubshape<KShape<Dimension::kDynamic, 2>, 1, Stride::kDynamic>
   >();
 
   REQUIRE(get_extent<0>(subshape1) == 1);

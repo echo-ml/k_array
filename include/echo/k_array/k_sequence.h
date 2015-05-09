@@ -13,7 +13,7 @@ namespace k_array {
 template <class Tag, int N>
 class KSequence {
  public:
-  template <class... Extents>
+  template <class... Extents, CONCEPT_REQUIRES(sizeof...(Extents) == N)>
   explicit KSequence(Extents... extents)
       : _extents(extents...) {}
 

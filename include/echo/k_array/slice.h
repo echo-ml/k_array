@@ -420,7 +420,8 @@ namespace slice {
 template <class Shape, index_t... Strides, int N>
 auto slice_impl(const Shape& shape, const Index<N>& dynamic_strides,
                 fatal::constant_sequence<index_t, Strides...>) {
-  return KSubshape<Shape, Strides...>(shape, dynamic_strides);
+  // return KSubshape<Shape, Strides...>(shape, dynamic_strides);
+  return make_k_subshape(shape, KShapeStrides<Strides...>(dynamic_strides));
 }
 }  // namespace slice
 }  // namespace detail

@@ -79,6 +79,25 @@ constexpr bool stride_sequence() {
   return dimensionality<T>();
 }
 
+///////////////////
+// shape_strides //
+///////////////////
+
+namespace detail { namespace concept {
+struct ShapeStrides : Concept {
+  template<class T>
+  auto require(T&& shape_strides) -> list<
+    stride_sequence<typename T::StrideSequence>(),
+    valid<decltype(shape_strides.template dynamic_stride<0>())>()
+  >;
+};
+}}
+
+template<class T>
+constexpr bool shape_strides() {
+  return models<detail::concept::ShapeStrides, T>();
+}
+
 //////////////
 // subshape //
 //////////////
@@ -89,9 +108,8 @@ struct Subshape : Concept {
   template <class T>
   auto require(T&& shape)
       -> list<dimensionality<typename T::Dimensionality>(),
-              stride_sequence<typename T::StrideSequence>(),
+              shape_strides<T>(),
               valid<decltype(shape.template dynamic_extent<0>())>(),
-              valid<decltype(shape.template dynamic_stride<0>())>(),
               T::Dimensionality::size == T::StrideSequence::size>;
 };
 }  // namespace concept

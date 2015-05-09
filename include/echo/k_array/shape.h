@@ -68,7 +68,8 @@ index_t get_extent(const Shape& shape) {
 // is_static_stride //
 //////////////////////
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>())>
+template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>() ||
+                                               concept::shape_strides<Shape>())>
 constexpr bool is_static_stride() {
   return shape_traits::static_stride<I, Shape>();
 }
@@ -104,15 +105,17 @@ constexpr index_t get_stride(const Shape& shape) {
   return get_extent<I - 1>(shape) * get_stride<I - 1>(shape);
 }
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::subshape<Shape>() &&
-                                               is_static_stride<I, Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape_strides<Shape>() &&
+                           is_static_stride<I, Shape>())>
 constexpr auto get_stride(const Shape& shape)
     -> decltype(get<I>(shape_traits::stride_sequence<Shape>())) {
   return {};
 }
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::subshape<Shape>() &&
-                                               !is_static_stride<I, Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape_strides<Shape>() &&
+                           !is_static_stride<I, Shape>())>
 index_t get_stride(const Shape& shape) {
   using namespace const_algorithm;
   constexpr int dynamic_index =
@@ -361,9 +364,10 @@ bool are_shapes_equal(const Shape1& shape1, const Shape2& shape2) {
 ////////////////
 
 template <class Shape1, class Shape2,
+          CONCEPT_REQUIRES(concept::shape<Shape1>() &&
+                           concept::shape<Shape2>()),
           CONCEPT_REQUIRES(
-              concept::shape<Shape1>() && concept::shape<Shape2>()),
-              CONCEPT_REQUIRES(detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
+              detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
 constexpr std::false_type operator==(const Shape1&, const Shape2&) {
   return {};
 }
@@ -376,11 +380,12 @@ constexpr std::true_type operator==(const Shape1, const Shape2&) {
   return {};
 }
 template <class Shape1, class Shape2,
+          CONCEPT_REQUIRES(concept::shape<Shape1>() &&
+                           concept::shape<Shape2>() &&
+                           !(concept::static_shape<Shape1>() &&
+                             concept::static_shape<Shape2>())),
           CONCEPT_REQUIRES(
-              concept::shape<Shape1>() && concept::shape<Shape2>() &&
-              !(concept::static_shape<Shape1>() &&
-                concept::static_shape<Shape2>())),
-              CONCEPT_REQUIRES(!detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
+              !detail::shape::are_shapes_statically_unequal<Shape1, Shape2>())>
 bool operator==(const Shape1& shape1, const Shape2& shape2) {
   return detail::shape::are_shapes_equal<0>(shape1, shape2);
 }
