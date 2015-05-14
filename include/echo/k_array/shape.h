@@ -38,9 +38,10 @@ constexpr index_t get_num_dimensions() {
 // is_static_extent //
 //////////////////////
 
-template <int I, class Shape, CONCEPT_REQUIRES(concept::shape<Shape>())>
+template <int I, class Shape,
+          CONCEPT_REQUIRES(concept::shape<Shape>() &&
+                           I < shape_traits::num_dimensions<Shape>())>
 constexpr bool is_static_extent() {
-  static_assert(I < shape_traits::num_dimensions<Shape>(), "");
   return shape_traits::static_extent<I, Shape>();
 }
 

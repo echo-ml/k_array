@@ -46,5 +46,7 @@ TEST_CASE("k_shape") {
         decltype(shape2)
       , KShapeFromExtents<StaticIndex<3>, StaticIndex<7>>
     >();
+
+    auto shape3 = make_k_shape(3, 2_index);
   }
 }

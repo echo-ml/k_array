@@ -17,7 +17,7 @@ using echo::concept::models;
 
 namespace detail {
 namespace concept {
-template <IndexInteger N, CONCEPT_REQUIRES(N > 1)>
+template <IndexInteger N, CONCEPT_REQUIRES(N > 0)>
 auto static_extent_impl(StaticIndex<N>) -> std::true_type;
 
 auto static_extent_impl(...) -> std::false_type;
@@ -37,7 +37,8 @@ constexpr bool static_extent() {
 
 template <class T>
 constexpr bool dynamic_extent() {
-  return std::is_convertible<T, IndexInteger>::value && !static_extent<T>();
+  return std::is_convertible<T, index_t>::value && std::is_integral<T>::value &&
+         !static_extent<T>();
 }
 
 ////////////
@@ -83,19 +84,41 @@ constexpr bool stride_sequence() {
 // shape_strides //
 ///////////////////
 
-namespace detail { namespace concept {
+namespace detail {
+namespace concept {
 struct ShapeStrides : Concept {
-  template<class T>
-  auto require(T&& shape_strides) -> list<
-    stride_sequence<typename T::StrideSequence>(),
-    valid<decltype(shape_strides.template dynamic_stride<0>())>()
-  >;
+  template <class T>
+  auto require(T&& shape_strides)
+      -> list<stride_sequence<typename T::StrideSequence>(),
+              valid<decltype(shape_strides.template dynamic_stride<0>())>()>;
 };
-}}
+}
+}
 
-template<class T>
+template <class T>
 constexpr bool shape_strides() {
   return models<detail::concept::ShapeStrides, T>();
+}
+
+//////////////////////
+// contiguous_shape //
+//////////////////////
+
+namespace detail {
+namespace concept {
+struct ContiguousShape : Concept {
+  template <class T>
+  auto require(T&& shape)
+      -> list<dimensionality<typename T::Dimensionality>(), !shape_strides<T>(),
+              valid<decltype(shape.template dynamic_extent<0>())>(),
+              same<T, uncvref_t<decltype(get_extent_shape(shape))>>()>;
+};
+}  // namespace concept
+}  // namespace detail
+
+template <class T>
+constexpr bool contiguous_shape() {
+  return models<detail::concept::ContiguousShape, T>();
 }
 
 //////////////
@@ -107,9 +130,9 @@ namespace concept {
 struct Subshape : Concept {
   template <class T>
   auto require(T&& shape)
-      -> list<dimensionality<typename T::Dimensionality>(),
-              shape_strides<T>(),
+      -> list<dimensionality<typename T::Dimensionality>(), shape_strides<T>(),
               valid<decltype(shape.template dynamic_extent<0>())>(),
+              contiguous_shape<uncvref_t<decltype(get_extent_shape(shape))>>(),
               T::Dimensionality::size == T::StrideSequence::size>;
 };
 }  // namespace concept
@@ -118,26 +141,6 @@ struct Subshape : Concept {
 template <class T>
 constexpr bool subshape() {
   return models<detail::concept::Subshape, T>();
-}
-
-//////////////////////
-// contiguous_shape //
-//////////////////////
-
-namespace detail {
-namespace concept {
-struct ContiguousShape : Concept {
-  template <class T>
-  auto require(T&& shape) -> list<
-      dimensionality<typename T::Dimensionality>(),
-      valid<decltype(shape.template dynamic_extent<0>())>(), !subshape<T>()>;
-};
-}  // namespace concept
-}  // namespace detail
-
-template <class T>
-constexpr bool contiguous_shape() {
-  return models<detail::concept::ContiguousShape, T>();
 }
 
 ///////////
