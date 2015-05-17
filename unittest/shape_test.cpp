@@ -237,3 +237,9 @@ TEST_CASE("extent_traits") {
 
   static_assert(k_array::extent_traits::extent_enum<StaticIndex<3>>() == 3, "");
 }
+
+TEST_CASE("num_free_dimensions") {
+  CHECK(shape_traits::num_free_dimensions<KShape<1>>() == 0);
+  CHECK(shape_traits::num_free_dimensions<KShape<1, 3>>() == 1);
+  CHECK(shape_traits::num_free_dimensions<KShape<7, 1, 3>>() == 2);
+}

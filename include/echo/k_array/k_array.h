@@ -14,8 +14,7 @@ namespace k_array {
 
 template <class T, class Shape, class Allocator = std::allocator<T>>
 class KArray : Shape,
-               public KArrayAccessor<KArray<T, Shape, Allocator>,
-                                     memory_backend_traits::pointer<Allocator>>,
+               public KArrayAccessor<KArray<T, Shape, Allocator>, Shape>,
                public KArrayAssignment<KArray<T, Shape, Allocator>, T>,
                Allocator {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),
@@ -136,7 +135,7 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
                                            decltype(get_num_elements(
                                                Shape()))::value>,
       public KArrayAccessor<KArray<T, Shape, StaticAllocator<T, Alignment>>,
-                            T*>,
+                            Shape>,
       public KArrayAssignment<KArray<T, Shape, StaticAllocator<T, Alignment>>,
                               T> {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),

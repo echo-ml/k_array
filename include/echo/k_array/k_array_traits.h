@@ -20,8 +20,8 @@ template <class KArray>
 using shape_type = uncvref_t<decltype(std::declval<KArray>().shape())>;
 
 template <int I, class KArray>
-using extent_type =
-    decltype(k_array::get_extent<I>(std::declval<shape_type<KArray>>()));
+using extent_type = shape_traits::extent_type<I, shape_type<KArray>>;
+    // decltype(k_array::get_extent<I>(std::declval<shape_type<KArray>>()));
 
 template <class KArray>
 using dimensionality = shape_traits::dimensionality<shape_type<KArray>>;

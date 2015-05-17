@@ -12,7 +12,7 @@ namespace k_array {
 template <class Pointer, class Shape>
 class KArrayView
     : Shape,
-      public KArrayConstAccessor<KArrayView<Pointer, Shape>, Pointer> {
+      public KArrayConstAccessor<KArrayView<Pointer, Shape>, Shape> {
   CONCEPT_ASSERT(echo::concept::contiguous_iterator<Pointer>(),
                  "Pointer must be a contiguous iterator");
   CONCEPT_ASSERT(concept::shape<Shape>(), "Shape does not model Shape concept");

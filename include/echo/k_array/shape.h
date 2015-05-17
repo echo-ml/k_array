@@ -425,4 +425,40 @@ bool operator!=(const Shape1& lhs, const Shape2& rhs) {
   return !(lhs == rhs);
 }
 }  // namespace k_array
+
+namespace shape_traits {
+
+/////////////////
+// extent_type //
+/////////////////
+
+template <int I, class Shape>
+using extent_type = decltype(k_array::get_extent<I>(std::declval<Shape>()));
+
+/////////////////////////
+// num_free_dimensions //
+/////////////////////////
+
+namespace detail {
+namespace shape {
+
+template <int I, class Shape, CONCEPT_REQUIRES(num_dimensions<Shape>() == I)>
+constexpr int count_free_dimensions() {
+  return 0;
+}
+
+template <int I, class Shape, CONCEPT_REQUIRES(num_dimensions<Shape>() != I)>
+constexpr int count_free_dimensions() {
+  return (std::is_same<extent_type<I, Shape>, StaticIndex<1>>::value ? 0 : 1) +
+         count_free_dimensions<I + 1, Shape>();
+}
+}
+}
+
+template <class Shape>
+constexpr int num_free_dimensions() {
+  return detail::shape::count_free_dimensions<0, Shape>();
+}
+}
+
 }  // namespace echo
