@@ -104,3 +104,9 @@ TEST_CASE("static k_array") {
   a1 = a2;
   REQUIRE(a1(1, 0) == 3);
 }
+
+TEST_CASE("k_array_accessor") {
+  KArray<double, KShape<2, 3>> a2;
+  a2(0,1) = 7;
+  CHECK(a2(0, 1) == 7);
+}

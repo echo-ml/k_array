@@ -256,6 +256,22 @@ constexpr bool k_array() {
   return models<detail::concept::KArray, T>();
 }
 
+namespace detail {
+namespace concept {
+template <int K>
+struct DimensionedKArray : Concept {
+  template <class KArray>
+  auto require(KArray&& x)
+      -> list<k_array<KArray>(), k_shape<K, uncvref_t<decltype(x.shape())>>()>;
+};
+}
+}
+
+template <int K, class T>
+constexpr bool k_array() {
+  return models<detail::concept::DimensionedKArray<K>, T>();
+}
+
 ////////////////////////
 // contiguous_k_array //
 ////////////////////////
@@ -273,6 +289,11 @@ struct ContiguousKArray : Concept {
 template <class T>
 constexpr bool contiguous_k_array() {
   return models<detail::concept::ContiguousKArray, T>();
+}
+
+template <int K, class T>
+constexpr bool contiguous_k_array() {
+  return contiguous_k_array<T>() && k_array<K, T>();
 }
 
 }  // namespace concept

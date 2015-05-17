@@ -435,6 +435,15 @@ namespace shape_traits {
 template <int I, class Shape>
 using extent_type = decltype(k_array::get_extent<I>(std::declval<Shape>()));
 
+/////////////////////
+// fixed_dimension //
+/////////////////////
+
+template <int I, class Shape>
+constexpr auto fixed_dimension() -> decltype((extent_type<I, Shape>(), true)) {
+  return std::is_same<extent_type<I, Shape>, StaticIndex<1>>::value;
+}
+
 /////////////////////////
 // num_free_dimensions //
 /////////////////////////
