@@ -28,5 +28,11 @@ using stride_type = decltype(k_array::get_stride<I>(std::declval<KArray>()));
 
 template <class KArray>
 using dimensionality = shape_traits::dimensionality<shape_type<KArray>>;
+
+template <class KArray>
+constexpr auto num_dimensions()
+    -> decltype(shape_traits::num_dimensions<shape_type<KArray>>()) {
+  return shape_traits::num_dimensions<shape_type<KArray>>();
+}
 }  // namespace k_array_traits
 }  // namespace echo

@@ -43,7 +43,7 @@ class KArray : Shape,
     copy_construct(other);
   }
 
-  KArray(KArray&& other) : Shape(other), Allocator(other) {
+  KArray(KArray&& other) : Shape(other.shape()), Allocator(other.allocator()) {
     _data = other._data;
     other._data = nullptr;
   }
@@ -84,6 +84,10 @@ class KArray : Shape,
 
   const Shape& shape() const { return static_cast<const Shape&>(*this); }
 
+  const Allocator& allocator() const {
+    return static_cast<const Allocator&>(*this);
+  }
+
  private:
   template <class OtherT, class OtherAllocator,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
@@ -122,6 +126,7 @@ class KArray : Shape,
   }
 
   void release() noexcept {
+    if (!_data) return;
     this->deallocate(_data, get_num_elements(*this));
     _data = nullptr;
   }
