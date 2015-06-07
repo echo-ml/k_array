@@ -34,5 +34,22 @@ constexpr auto num_dimensions()
     -> decltype(shape_traits::num_dimensions<shape_type<KArray>>()) {
   return shape_traits::num_dimensions<shape_type<KArray>>();
 }
+
+template<class KArray>
+constexpr auto num_free_dimensions()
+  -> decltype(
+    shape_traits::num_free_dimensions<shape_type<KArray>>()) 
+{
+    return shape_traits::num_free_dimensions<shape_type<KArray>>() ;
+}
+
+template<class KArray>
+constexpr auto free_dimension()
+  -> decltype(
+    shape_traits::free_dimension<shape_type<KArray>>()) 
+{
+    return shape_traits::free_dimension<shape_type<KArray>>() ;
+}
+
 }  // namespace k_array_traits
 }  // namespace echo

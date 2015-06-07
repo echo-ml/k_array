@@ -242,4 +242,6 @@ TEST_CASE("num_free_dimensions") {
   CHECK(shape_traits::num_free_dimensions<KShape<1>>() == 0);
   CHECK(shape_traits::num_free_dimensions<KShape<1, 3>>() == 1);
   CHECK(shape_traits::num_free_dimensions<KShape<7, 1, 3>>() == 2);
+  CHECK(shape_traits::free_dimension<KShape<1, 3>>() == 1);
+  CHECK(shape_traits::free_dimension<KShape<3, 1>>() == 0);
 }

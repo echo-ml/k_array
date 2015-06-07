@@ -464,9 +464,32 @@ constexpr int count_free_dimensions() {
 }
 }
 
-template <class Shape>
+template <class Shape, CONCEPT_REQUIRES(k_array::concept::shape<Shape>())>
 constexpr int num_free_dimensions() {
   return detail::shape::count_free_dimensions<0, Shape>();
+}
+
+namespace detail {
+namespace shape {
+
+template <int I, class Shape, CONCEPT_REQUIRES(I == num_dimensions<Shape>())>
+constexpr int free_dimension_impl() {
+  return -1;
+}
+
+template <int I, class Shape, CONCEPT_REQUIRES(I != num_dimensions<Shape>())>
+constexpr int free_dimension_impl() {
+  return !std::is_same<extent_type<I, Shape>, StaticIndex<1>>::value
+             ? I
+             : free_dimension_impl<I + 1, Shape>();
+}
+}
+}
+
+template <class Shape, CONCEPT_REQUIRES(k_array::concept::shape<Shape>()),
+          CONCEPT_REQUIRES(num_free_dimensions<Shape>() == 1)>
+constexpr int free_dimension() {
+  return detail::shape::free_dimension_impl<0, Shape>();
 }
 }
 
