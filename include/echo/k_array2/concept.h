@@ -18,6 +18,28 @@ class Subshape;
 
 namespace concept {
 
+//////////////////
+// static_index //
+//////////////////
+
+namespace detail {
+namespace concept {
+
+template <index_t I>
+auto static_index_impl(StaticIndex<I> && ) -> std::true_type;
+
+template <class T>
+auto static_index_impl(T && ) -> std::false_type;
+}
+}
+
+template <class T>
+constexpr bool static_index() {
+  using Result =
+      decltype(detail::concept::static_index_impl(std::declval<T>()));
+  return Result::value;
+}
+
 ////////////
 // extent //
 ////////////
@@ -47,17 +69,18 @@ constexpr bool extent() {
 namespace detail {
 namespace concept {
 
-struct IndexTuple : Concept {
-  template <class... Extents>
-  auto require(htl::Tuple<Extents...>&& tuple)
-      -> list<and_c<extent<Extents>()...>()>;
-};
+template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
+auto index_tuple_impl(htl::Tuple<Extents...> && ) -> std::true_type;
+
+template <class T>
+auto index_timple_impl(T && ) -> std::false_type;
 }
 }
 
 template <class T>
 constexpr bool index_tuple() {
-  return models<detail::concept::IndexTuple, T>();
+  using Result = decltype(detail::concept::index_tuple_impl(std::declval<T>()));
+  return Result::value;
 }
 
 ////////////////////
@@ -66,8 +89,7 @@ constexpr bool index_tuple() {
 
 namespace detail {
 namespace concept {
-template <class... Extents,
-          CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
+template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
 auto dimensionality_impl(Dimensionality<Extents...> && ) -> std::true_type;
 
 template <class T>
@@ -82,27 +104,57 @@ constexpr bool dimensionality() {
   return Result::value;
 }
 
+//////////////////////
+// contiguous_shape //
+//////////////////////
+
+namespace detail {
+namespace concept {
+
+template <class... Extents>
+auto contiguous_shape_impl(Shape<Extents...> && ) -> std::true_type;
+
+template <class T>
+auto contiguous_shape_impl(T && ) -> std::false_type;
+}
+}
+
+template <class T>
+constexpr bool contiguous_shape() {
+  using Result =
+      decltype(detail::concept::contiguous_shape_impl(std::declval<T>()));
+  return Result::value;
+}
+
 //////////////
 // subshape //
 //////////////
 
-namespace detail { namespace concept {
+namespace detail {
+namespace concept {
 
-template<class Dimensionality, class Strides>
-auto subshape_impl(Subshape<Dimensionality, Strides>&&)  -> std::true_type;
+template <class Dimensionality, class Strides>
+auto subshape_impl(Subshape<Dimensionality, Strides> && ) -> std::true_type;
 
-template<class T>
-auto subshape_impl(T&&) -> std::false_type;
+template <class T>
+auto subshape_impl(T && ) -> std::false_type;
+}
+}
 
-}}
-
-template<class T>
+template <class T>
 constexpr bool subshape() {
-  using Result =
-    decltype(detail::concept::subshape_impl(std::declval<T>()));
+  using Result = decltype(detail::concept::subshape_impl(std::declval<T>()));
   return Result::value;
 }
 
+///////////
+// shape //
+///////////
+
+template <class T>
+constexpr bool shape() {
+  return contiguous_shape<T>() || subshape<T>();
+}
 }
 }
 }

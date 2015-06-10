@@ -34,3 +34,14 @@ TEST_CASE("get_stride") {
 
   CHECK(get_stride<2>(s2) == 8);
 }
+
+TEST_CASE("shape - get_1d_index") {
+  auto shape1 = make_shape(3_index, 2_index, 7, 8);
+  CHECK(get_1d_index(shape1, 1, 0, 5, 3) == 157);
+}
+
+TEST_CASE("subshape - get_1d_index") {
+  auto subshape1 = make_subshape(make_dimensionality(2, 3, 4, 1),
+                                 htl::make_tuple(2_index, 5_index, 12, 13));
+  CHECK(get_1d_index(subshape1, 1, 2, 3, 0) == 48);
+}

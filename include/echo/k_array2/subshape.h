@@ -49,5 +49,37 @@ template <int I, class Dimensionality, class Strides>
 auto get_stride(const Subshape<Dimensionality, Strides>& subshape) {
   return htl::get<I>(subshape.strides());
 }
+
+//////////////////
+// get_1d_index //
+//////////////////
+
+namespace detail {
+namespace subshape {
+
+template <class Stride>
+index_t get_1d_index_impl(const htl::Tuple<Stride>& strides, index_t index) {
+  return htl::head(strides) * index;
+}
+
+template <class StrideFirst, class... StridesRest, class... IndexesRest>
+index_t get_1d_index_impl(
+    const htl::Tuple<StrideFirst, StridesRest...>& strides, index_t index_first,
+    IndexesRest... indexes_rest) {
+  return htl::head(strides) * index_first +
+         get_1d_index_impl(htl::tail(strides), indexes_rest...);
+}
+}
+}
+
+template <
+    class... Extents, class Strides, class... Indexes,
+    CONCEPT_REQUIRES(sizeof...(Extents) == sizeof...(Indexes) &&
+                     and_c<std::is_convertible<Indexes, index_t>::value...>())>
+index_t get_1d_index(
+    const Subshape<Dimensionality<Extents...>, Strides>& subshape,
+    Indexes... indexes) {
+  return detail::subshape::get_1d_index_impl(subshape.strides(), indexes...);
+}
 }
 }

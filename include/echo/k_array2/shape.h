@@ -17,9 +17,9 @@ class Shape : public Dimensionality<Extents...> {
 
  public:
   Shape() = default;
-  Shape(const Base& dimensionality) : Base(dimensionality) {}
+  explicit Shape(const Base& dimensionality) : Base(dimensionality) {}
 
-  Shape(Extents... extents) : Base(extents...) {}
+  explicit Shape(Extents... extents) : Base(extents...) {}
 
   const auto& dimensionality() const { return static_cast<const Base&>(*this); }
 };
@@ -51,6 +51,37 @@ auto get_stride(const Shape<Extents...>& shape) {
   decltype(auto) extents_ = reinterpret_cast<const Extents_&>(shape.extents());
   return htl::left_fold([](auto x, auto y) { return x * y; }, 1_index,
                         extents_);
+}
+
+//////////////////
+// get_1d_index //
+//////////////////
+
+namespace detail {
+namespace shape {
+
+template <class Extent>
+index_t get_1d_index_impl(const htl::Tuple<Extent>&, index_t index) {
+  return index;
+}
+
+template <class ExtentFirst, class... ExtentsRest, class... IndexesRest>
+index_t get_1d_index_impl(
+    const htl::Tuple<ExtentFirst, ExtentsRest...>& extents, index_t index_first,
+    IndexesRest... indexes_rest) {
+  return index_first +
+         htl::head(extents) *
+             get_1d_index_impl(htl::tail(extents), indexes_rest...);
+}
+}
+}
+
+template <
+    class... Extents, class... Indexes,
+    CONCEPT_REQUIRES(sizeof...(Extents) == sizeof...(Indexes) &&
+                     and_c<std::is_convertible<Indexes, index_t>::value...>())>
+index_t get_1d_index(const Shape<Extents...>& shape, Indexes... indexes) {
+  return detail::shape::get_1d_index_impl(shape.extents(), indexes...);
 }
 }
 }
