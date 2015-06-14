@@ -1,6 +1,8 @@
 #include <echo/k_array2/dimensionality.h>
 #include <echo/k_array2/shape.h>
 #include <echo/k_array2/subshape.h>
+#include <echo/k_array2/k_array.h>
+#include <echo/k_array2/shaped.h>
 #include <echo/test.h>
 
 using namespace echo;
@@ -21,6 +23,26 @@ TEST_CASE("dimensionality") {
   CHECK(d4 == d2);
 
   type_equal<decltype(d1), decltype(d5)>();
+}
+
+TEST_CASE("concept2") {
+  DimensionalityC<dimension_t::dynamic, 3> d1;
+  DimensionalityC<2, 1, 3> d2;
+  ShapeC<3, 4> s1;
+  Subshape<ShapeC<3, 2>, htl::Tuple<StaticIndex<2>, StaticIndex<8>>> s2;
+
+  CHECK(k_array::concept::dimensionality<decltype(d1)>());
+  CHECK(!k_array::concept::dimensionality<decltype(s1)>());
+
+  CHECK(k_array::concept::static_dimensionality<decltype(d2)>());
+  CHECK(!k_array::concept::static_dimensionality<decltype(d1)>());
+
+  CHECK(k_array::concept::contiguous_shape<decltype(s1)>());
+  CHECK(!k_array::concept::contiguous_shape<decltype(s2)>());
+}
+
+TEST_CASE("k_array2") {
+  KArray<double, ShapeC<2,3>> a1;
 }
 
 TEST_CASE("get_num_elements") {

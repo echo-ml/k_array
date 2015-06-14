@@ -11,6 +11,6 @@ using dimensionality_traits::num_free_dimensions;
 using dimensionality_traits::free_dimension;
 
 template<int I, class T>
-using stride_type = decltype(get_stride<I>(std::declval<T>()));
+using stride_type = decltype(k_array::get_stride<I>(std::declval<T>()));
 
 }}

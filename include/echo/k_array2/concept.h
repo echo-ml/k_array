@@ -94,6 +94,13 @@ auto dimensionality_impl(Dimensionality<Extents...> && ) -> std::true_type;
 
 template <class T>
 auto dimensionality_impl(T && ) -> std::false_type;
+
+template <index_t... Indexes>
+auto static_dimensionality_impl(Dimensionality<StaticIndex<Indexes>...> && )
+    -> std::true_type;
+
+template <class T>
+auto static_dimensionality_impl(T && ) -> std::false_type;
 }
 }
 
@@ -101,6 +108,13 @@ template <class T>
 constexpr bool dimensionality() {
   using Result =
       decltype(detail::concept::dimensionality_impl(std::declval<T>()));
+  return Result::value;
+}
+
+template <class T>
+constexpr bool static_dimensionality() {
+  using Result =
+      decltype(detail::concept::static_dimensionality_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -154,6 +168,65 @@ constexpr bool subshape() {
 template <class T>
 constexpr bool shape() {
   return contiguous_shape<T>() || subshape<T>();
+}
+
+//////////////////
+// static_shape //
+//////////////////
+
+namespace detail {
+namespace concept {
+
+struct StaticShape : Concept {
+  template <class T>
+  auto require(T&& shape) -> list<
+      k_array::concept::shape<T>(),
+      static_dimensionality<uncvref_t<decltype(shape.dimensionality())>>()>;
+};
+}
+}
+
+template <class T>
+constexpr bool static_shape() {
+  return models<detail::concept::StaticShape, T>();
+}
+
+/////////////////
+// dimensioned //
+/////////////////
+
+namespace detail {
+namespace concept {
+
+struct Dimensioned : Concept {
+  template <class T>
+  auto require(T&& x) -> list<dimensionality<decltype(x.dimensionality())>()>;
+};
+}
+}
+
+template <class T>
+constexpr bool dimensioned() {
+  return models<detail::concept::Dimensioned, T>();
+}
+
+////////////
+// shaped //
+////////////
+
+namespace detail {
+namespace concept {
+
+struct Shaped : Concept {
+  template <class T>
+  auto require(T&& x) -> list<shape<decltype(x.shape())>()>;
+};
+}
+}
+
+template <class T>
+constexpr bool shaped() {
+  return models<detail::concept::Shaped, T>();
 }
 }
 }

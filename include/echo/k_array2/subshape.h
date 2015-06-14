@@ -21,6 +21,7 @@ class Subshape : public Dimensionality,
   using StridesBase = htl::Pack<detail::subshape::strides_tag, Strides>;
 
  public:
+  Subshape() {}
   Subshape(const Dimensionality& dimensionality, const Strides& strides)
       : Dimensionality(dimensionality), StridesBase(strides) {}
 
