@@ -24,6 +24,13 @@ class Shape : public Dimensionality<Extents...> {
   const auto& dimensionality() const { return static_cast<const Base&>(*this); }
 };
 
+////////////
+// ShapeC //
+////////////
+
+template <index_t... ExtentsC>
+using ShapeC = Shape<ExtentC<ExtentsC>...>;
+
 ////////////////
 // make_shape //
 ////////////////

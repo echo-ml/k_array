@@ -6,13 +6,23 @@
 namespace echo {
 namespace k_array {
 
+/////////////////
+// dimension_t //
+/////////////////
+
+namespace dimension_t {
+static constexpr index_t dynamic = -1;
+}
+
 ////////////////////
 // Dimensionality //
 ////////////////////
 
-namespace detail { namespace dimensionality {
+namespace detail {
+namespace dimensionality {
 struct extents_tag {};
-}}
+}
+}
 
 template <class... Extents>
 class Dimensionality
@@ -31,10 +41,23 @@ class Dimensionality
     return htl::get<I>(htl::unpack(*this));
   }
 
-  decltype(auto) extents() const {
-    return htl::unpack(*this);
-  }
+  decltype(auto) extents() const { return htl::unpack(*this); }
 };
+
+/////////////
+// ExtentC //
+/////////////
+
+template <index_t I>
+using ExtentC =
+    std::conditional_t<I == dimension_t::dynamic, index_t, StaticIndex<I>>;
+
+/////////////////////
+// DimensionalityC //
+/////////////////////
+
+template <index_t... ExtentsC>
+using DimensionalityC = Dimensionality<ExtentC<ExtentsC>...>;
 
 /////////////////////////
 // make_dimensionality //
@@ -60,14 +83,31 @@ auto get_extent(const Dimensionality<Extents...>& dimensionality) {
 // get_num_elements //
 //////////////////////
 
-template<class... Extents>
+template <class... Extents>
 auto get_num_elements(const Dimensionality<Extents...>& dimensionality) {
-  return htl::left_fold(
-    [](auto x, auto y) { return x*y; },
-    1_index,
-    dimensionality.extents());
+  return htl::left_fold([](auto x, auto y) { return x * y; }, 1_index,
+                        dimensionality.extents());
 }
 
+////////////////
+// operator== //
+////////////////
+
+template <class... LhsExtents, class... RhsExtents>
+auto operator==(const Dimensionality<LhsExtents...>& lhs,
+                const Dimensionality<RhsExtents...>& rhs) {
+  return lhs.extents() == rhs.extents();
+}
+
+////////////////
+// operator!= //
+////////////////
+
+template <class... LhsExtents, class... RhsExtents>
+auto operator!=(const Dimensionality<LhsExtents...>& lhs,
+                const Dimensionality<RhsExtents...>& rhs) {
+  return lhs.extents() != rhs.extents();
+}
 }
 
 namespace dimensionality_traits {
@@ -88,5 +128,61 @@ constexpr auto num_dimensions() -> decltype(Dimensionality::num_dimensions) {
 template <int I, class Dimensionality>
 using extent_type =
     decltype(k_array::get_extent<I>(std::declval<Dimensionality>()));
+
+/////////////////////////
+// num_free_dimensions //
+/////////////////////////
+
+namespace detail { namespace dimensionality {
+
+template <class Dimensionality>
+auto num_free_dimensions_impl(Dimensionality dimensionality) {
+  auto is_free_dimension = [](auto x) {
+    return htl::integral_constant<
+        bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
+  };
+  return htl::count_if(is_free_dimension,
+    dimensionality.extents());
+}
+
+}}
+
+template <class Dimensionality,
+          CONCEPT_REQUIRES(k_array::concept::dimensionality<Dimensionality>())>
+constexpr int num_free_dimensions() {
+  using Result = decltype(
+    detail::dimensionality::num_free_dimensions_impl(
+      std::declval<Dimensionality>()
+  ));
+  return Result::value;
+}
+
+////////////////////
+// free_dimension //
+////////////////////
+
+namespace detail { namespace dimensionality {
+
+template <class Dimensionality>
+auto free_dimension_impl(Dimensionality dimensionality) {
+  auto is_free_dimension = [](auto x) {
+    return htl::integral_constant<
+        bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
+  };
+  return htl::find_if(is_free_dimension,
+    dimensionality.extents());
+}
+
+}}
+
+template <class Dimensionality,
+          CONCEPT_REQUIRES(num_free_dimensions<Dimensionality>() == 1)>
+constexpr int free_dimension() {
+  using Result = decltype(
+    detail::dimensionality::free_dimension_impl(
+      std::declval<Dimensionality>())
+  );
+  return Result::value;
+}
 }
 }
