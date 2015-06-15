@@ -191,25 +191,6 @@ constexpr bool static_shape() {
   return models<detail::concept::StaticShape, T>();
 }
 
-/////////////////
-// dimensioned //
-/////////////////
-
-namespace detail {
-namespace concept {
-
-struct Dimensioned : Concept {
-  template <class T>
-  auto require(T&& x) -> list<dimensionality<decltype(x.dimensionality())>()>;
-};
-}
-}
-
-template <class T>
-constexpr bool dimensioned() {
-  return models<detail::concept::Dimensioned, T>();
-}
-
 ////////////
 // shaped //
 ////////////
@@ -219,7 +200,7 @@ namespace concept {
 
 struct Shaped : Concept {
   template <class T>
-  auto require(T&& x) -> list<shape<decltype(x.shape())>()>;
+  auto require(T&& x) -> list<shape<uncvref_t<decltype(x.shape())>>()>;
 };
 }
 }
@@ -228,6 +209,28 @@ template <class T>
 constexpr bool shaped() {
   return models<detail::concept::Shaped, T>();
 }
+
+/////////////////
+// dimensioned //
+/////////////////
+
+namespace detail {
+namespace concept {
+
+struct Dimensioned : Concept {
+  template <class T>
+  auto require(T&& x) -> list<
+    dimensionality<uncvref_t<decltype(x.dimensionality())>>()
+  >;
+};
+}
+}
+
+template <class T>
+constexpr bool dimensioned() {
+  return models<detail::concept::Dimensioned, T>() || shaped<T>();
+}
+
 }
 }
 }

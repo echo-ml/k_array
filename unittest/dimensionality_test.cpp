@@ -43,6 +43,14 @@ TEST_CASE("concept2") {
 
 TEST_CASE("k_array2") {
   KArray<double, ShapeC<2,3>> a1;
+  a1 = {{1, 2, 3}, {4,5,6}};
+  CHECK(a1(0,0) == 1);
+  CHECK(a1(0,1) == 2);
+  CHECK(a1(0,2) == 3);
+
+  CHECK(a1(1,0) == 4);
+  CHECK(a1(1,1) == 5);
+  CHECK(a1(1,2) == 6);
 }
 
 TEST_CASE("get_num_elements") {
@@ -96,4 +104,33 @@ TEST_CASE("subshape - get_1d_index") {
   auto subshape1 = make_subshape(make_dimensionality(2, 3, 4, 1),
                                  htl::make_tuple(2_index, 5_index, 12, 13));
   CHECK(get_1d_index(subshape1, 1, 2, 3, 0) == 48);
+}
+
+struct Shaped1 {
+  auto shape() const {
+    return ShapeC<3,5>();
+  }
+};
+
+struct Dimensioned1 {
+  auto dimensionality() const {
+    return DimensionalityC<7,8>();
+  }
+};
+
+TEST_CASE("shaped") {
+  Shaped1 s1;
+  Dimensioned1 d1;
+
+  CHECK(k_array::concept::dimensioned<Shaped1>());
+  CHECK(k_array::concept::dimensioned<Dimensioned1>());
+  CHECK(!k_array::concept::shaped<Dimensioned1>());
+  CHECK(k_array::concept::shaped<Shaped1>());
+  CHECK(!k_array::concept::dimensioned<int>());
+  CHECK(!k_array::concept::shaped<int>());
+
+  CHECK(get_num_elements(s1) == 15);
+  CHECK(get_num_elements(d1) == 56);
+  CHECK(get_extent<1>(d1) == 8);
+  CHECK(get_stride<1>(s1) == 3);
 }

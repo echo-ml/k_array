@@ -4,6 +4,9 @@
 #include <echo/k_array2/k_array_accessor.h>
 #include <echo/k_array2/concept.h>
 #include <echo/k_array2/k_array_traits.h>
+#include <echo/k_array2/shaped.h>
+#include <echo/k_array2/shape_traits.h>
+#include <echo/k_array2/k_array_initializer.h>
 #include <echo/memory.h>
 
 #include <memory>
@@ -13,10 +16,10 @@ namespace echo {
 namespace k_array {
 
 template <class T, class Shape, class Allocator = std::allocator<T>>
-class KArray : Shape,
+class KArray : htl::Pack<Shape>,
+               htl::Pack<Allocator>,
                public KArrayAccessor<KArray<T, Shape, Allocator>, Shape>,
-               // public KArrayAssignment<KArray<T, Shape, Allocator>, T>,
-               Allocator {
+               public KArrayInitializer<KArray<T, Shape, Allocator>, T, Shape> {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),
                  "shape must be contiguous");
 
@@ -27,15 +30,15 @@ class KArray : Shape,
   using const_reference = iterator_traits::reference<const_pointer>;
   using value_type = T;
 
-  // using KArrayAssignment<KArray, T>::operator=;
-
   explicit KArray(const Shape& shape = Shape(),
                   const Allocator& allocator = Allocator())
-      : Shape(shape), Allocator(allocator) {
-    _data = this->allocate(get_num_elements(*this));
+      : htl::Pack<Shape>(shape), htl::Pack<Allocator>(allocator) {
+    _data = this->allocator().allocate(get_num_elements(*this));
   }
 
-  KArray(const KArray& other) : Allocator(other) { copy_construct(other); }
+  KArray(const KArray& other) : KArray(other.shape(), other.allocator()) {
+    copy_construct(other);
+  }
 
   template <class OtherT, class OtherAllocator,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
@@ -60,14 +63,16 @@ class KArray : Shape,
 
   KArray& operator=(KArray&& other) noexcept {
     if (this == std::addressof(other)) return *this;
-
     release();
-
     static_cast<Shape&>(*this) = other.shape();
-
     _data = other._data;
     other._data = nullptr;
+    return *this;
+  }
 
+  KArray& operator=(
+      InitializerMultilist<T, shape_traits::num_dimensions<Shape>()> values) {
+    this->initialize(values);
     return *this;
   }
 
@@ -82,21 +87,20 @@ class KArray : Shape,
 
   const_pointer const_data() const { return _data; }
 
-  const Shape& shape() const { return static_cast<const Shape&>(*this); }
+  const Shape& shape() const { return htl::unpack<Shape>(*this); }
 
-  const Allocator& allocator() const {
-    return static_cast<const Allocator&>(*this);
-  }
+  Shape& shape() { return htl::unpack<Shape>(*this); }
+
+  const Allocator& allocator() const { return htl::unpack<Allocator>(*this); }
+  Allocator& allocator() { return htl::unpack<Allocator>(*this); }
 
  private:
   template <class OtherT, class OtherAllocator,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   void copy_construct(const KArray<OtherT, Shape, OtherAllocator>& other) {
     auto other_num_elements = get_num_elements(other);
-    static_cast<Shape&>(*this) = other.shape();
-
-    _data = this->allocate(other_num_elements);
-
+    shape() = other.shape();
+    _data = this->allocator().allocate(other_num_elements);
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
          other.data(), std::next(other.data(), other_num_elements),
          memory_backend_traits::memory_backend_tag<Allocator>(), _data);
@@ -106,28 +110,23 @@ class KArray : Shape,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   KArray& copy_assign(const KArray<OtherT, Shape, OtherAllocator>& other) {
     if (this == std::addressof(other)) return *this;
-
     auto this_num_elements = get_num_elements(*this);
     auto other_num_elements = get_num_elements(other);
-
     // TODO: allow for reallocation
     if (this_num_elements != other_num_elements) {
       release();
       _data = this->allocate(other_num_elements);
     }
-
     static_cast<Shape&>(*this) = other.shape();
-
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
          other.data(), std::next(other.data(), other_num_elements),
          memory_backend_traits::memory_backend_tag<Allocator>(), _data);
-
     return *this;
   }
 
   void release() noexcept {
     if (!_data) return;
-    this->deallocate(_data, get_num_elements(*this));
+    this->allocator().deallocate(_data, get_num_elements(*this));
     _data = nullptr;
   }
   pointer _data;
@@ -135,16 +134,17 @@ class KArray : Shape,
 
 template <class T, class Shape, int Alignment>
 class KArray<T, Shape, StaticAllocator<T, Alignment>>
-    : Shape,
+    : htl::Pack<Shape>,
       static_allocator_traits::buffer_type<StaticAllocator<T, Alignment>,
                                            decltype(get_num_elements(
                                                Shape()))::value>,
       public KArrayAccessor<KArray<T, Shape, StaticAllocator<T, Alignment>>,
                             Shape>
       //                       ,
-      // public KArrayAssignment<KArray<T, Shape, StaticAllocator<T, Alignment>>,
-      //                         T> 
-                              {
+      // public KArrayAssignment<KArray<T, Shape, StaticAllocator<T,
+      // Alignment>>,
+      //                         T>
+      {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),
                  "shape must be contiguous");
   CONCEPT_ASSERT(concept::static_shape<Shape>(),
@@ -169,7 +169,7 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
 
   void swap(KArray& other) { std::swap(*this, other); }
 
-  const Shape& shape() const { return static_cast<const Shape&>(*this); }
+  const Shape& shape() const { return htl::unpack<Shape>(*this); }
 };
 }  // namespace k_array
 }  // namespace echo

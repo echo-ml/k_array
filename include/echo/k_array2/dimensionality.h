@@ -2,6 +2,7 @@
 
 #include <echo/k_array2/concept.h>
 #include <echo/htl.h>
+#include <array>
 
 namespace echo {
 namespace k_array {
@@ -43,6 +44,29 @@ class Dimensionality
 
   decltype(auto) extents() const { return htl::unpack(*this); }
 };
+
+/////////////////////////
+// make_dimensionality //
+/////////////////////////
+
+namespace detail {
+namespace dimensionality {
+template <std::size_t... Indexes, class Extent>
+auto make_dimensionality_impl(
+    std::index_sequence<Indexes...>,
+    const std::array<Extent, sizeof...(Indexes)>& extents) {
+  return Dimensionality<repeat_type_c<Indexes, index_t>...>(
+      std::get<Indexes>(extents)...);
+}
+}
+}
+
+template <std::size_t N, class Extent,
+          CONCEPT_REQUIRES(std::is_convertible<Extent, index_t>::value)>
+auto make_dimensionality(const std::array<Extent, N>& extents) {
+  return detail::dimensionality::make_dimensionality_impl(
+      std::make_index_sequence<N>(), extents);
+}
 
 /////////////
 // ExtentC //
@@ -133,7 +157,8 @@ using extent_type =
 // num_free_dimensions //
 /////////////////////////
 
-namespace detail { namespace dimensionality {
+namespace detail {
+namespace dimensionality {
 
 template <class Dimensionality>
 auto num_free_dimensions_impl(Dimensionality dimensionality) {
@@ -141,19 +166,16 @@ auto num_free_dimensions_impl(Dimensionality dimensionality) {
     return htl::integral_constant<
         bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
   };
-  return htl::count_if(is_free_dimension,
-    dimensionality.extents());
+  return htl::count_if(is_free_dimension, dimensionality.extents());
 }
-
-}}
+}
+}
 
 template <class Dimensionality,
           CONCEPT_REQUIRES(k_array::concept::dimensionality<Dimensionality>())>
 constexpr int num_free_dimensions() {
-  using Result = decltype(
-    detail::dimensionality::num_free_dimensions_impl(
-      std::declval<Dimensionality>()
-  ));
+  using Result = decltype(detail::dimensionality::num_free_dimensions_impl(
+      std::declval<Dimensionality>()));
   return Result::value;
 }
 
@@ -161,7 +183,8 @@ constexpr int num_free_dimensions() {
 // free_dimension //
 ////////////////////
 
-namespace detail { namespace dimensionality {
+namespace detail {
+namespace dimensionality {
 
 template <class Dimensionality>
 auto free_dimension_impl(Dimensionality dimensionality) {
@@ -169,19 +192,16 @@ auto free_dimension_impl(Dimensionality dimensionality) {
     return htl::integral_constant<
         bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
   };
-  return htl::find_if(is_free_dimension,
-    dimensionality.extents());
+  return htl::find_if(is_free_dimension, dimensionality.extents());
 }
-
-}}
+}
+}
 
 template <class Dimensionality,
           CONCEPT_REQUIRES(num_free_dimensions<Dimensionality>() == 1)>
 constexpr int free_dimension() {
-  using Result = decltype(
-    detail::dimensionality::free_dimension_impl(
-      std::declval<Dimensionality>())
-  );
+  using Result = decltype(detail::dimensionality::free_dimension_impl(
+      std::declval<Dimensionality>()));
   return Result::value;
 }
 }
