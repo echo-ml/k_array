@@ -1,5 +1,6 @@
 #pragma once
 
+#include <echo/k_array2/k_array_fwd.h>
 #include <echo/static_allocator.h>
 #include <echo/k_array2/k_array_accessor.h>
 #include <echo/k_array2/concept.h>
@@ -15,7 +16,7 @@
 namespace echo {
 namespace k_array {
 
-template <class T, class Shape, class Allocator = std::allocator<T>>
+template <class T, class Shape, class Allocator>
 class KArray : htl::Pack<Shape>,
                htl::Pack<Allocator>,
                public KArrayAccessor<KArray<T, Shape, Allocator>, Shape>,
@@ -29,6 +30,8 @@ class KArray : htl::Pack<Shape>,
   using reference = iterator_traits::reference<pointer>;
   using const_reference = iterator_traits::reference<const_pointer>;
   using value_type = T;
+  using memory_backend_tag =
+      memory_backend_traits::memory_backend_tag<Allocator>;
 
   explicit KArray(const Shape& shape = Shape(),
                   const Allocator& allocator = Allocator())
@@ -139,12 +142,9 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
                                            decltype(get_num_elements(
                                                Shape()))::value>,
       public KArrayAccessor<KArray<T, Shape, StaticAllocator<T, Alignment>>,
-                            Shape>
-      //                       ,
-      // public KArrayAssignment<KArray<T, Shape, StaticAllocator<T,
-      // Alignment>>,
-      //                         T>
-      {
+                            Shape>,
+      public KArrayInitializer<KArray<T, Shape, StaticAllocator<T, Alignment>>,
+                               T, Shape> {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),
                  "shape must be contiguous");
   CONCEPT_ASSERT(concept::static_shape<Shape>(),
@@ -156,16 +156,22 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
   using reference = T&;
   using const_reference = const T&;
   using value_type = T;
+  using memory_backend_tag =
+      memory_backend_traits::memory_backend_tag<StaticAllocator<T, Alignment>>;
 
   using Buffer =
       static_allocator_traits::buffer_type<StaticAllocator<T, Alignment>,
                                            decltype(get_num_elements(
                                                Shape()))::value>;
 
-  // using KArrayAssignment<KArray, T>::operator=;
-
   using Buffer::data;
   using Buffer::const_data;
+
+  auto& operator=(
+      InitializerMultilist<T, shape_traits::num_dimensions<Shape>()> values) {
+    this->initialize(values);
+    return *this;
+  }
 
   void swap(KArray& other) { std::swap(*this, other); }
 

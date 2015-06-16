@@ -1,5 +1,7 @@
 #pragma once
 
+#include <echo/k_array2/k_array_fwd.h>
+#include <echo/k_array2/k_array_view_fwd.h>
 #include <echo/index.h>
 #include <echo/concept2.h>
 #include <echo/htl.h>
@@ -219,9 +221,8 @@ namespace concept {
 
 struct Dimensioned : Concept {
   template <class T>
-  auto require(T&& x) -> list<
-    dimensionality<uncvref_t<decltype(x.dimensionality())>>()
-  >;
+  auto require(T&& x)
+      -> list<dimensionality<uncvref_t<decltype(x.dimensionality())>>()>;
 };
 }
 }
@@ -231,6 +232,57 @@ constexpr bool dimensioned() {
   return models<detail::concept::Dimensioned, T>() || shaped<T>();
 }
 
+//////////////////
+// k_array_deep //
+//////////////////
+
+namespace detail {
+namespace concept {
+template <class T, class Shape, class Allocator>
+auto k_array_deep_impl(KArray<T, Shape, Allocator> && ) -> std::true_type;
+
+template <class T>
+auto k_array_deep_impl(T && ) -> std::false_type;
+}
+}
+
+template <class T>
+constexpr bool k_array_deep() {
+  using Result =
+      decltype(detail::concept::k_array_deep_impl(std::declval<T>()));
+  return Result::value;
+}
+
+//////////////////
+// k_array_view //
+//////////////////
+
+namespace detail {
+namespace concept {
+template <class Pointer, class Shape, class MemoryBackendTag>
+auto k_array_view_impl(KArrayView<Pointer, Shape, MemoryBackendTag> && )
+    -> std::true_type;
+
+template <class T>
+auto k_array_view_impl(T && ) -> std::false_type;
+}
+}
+
+template <class T>
+constexpr bool k_array_view() {
+  using Result =
+      decltype(detail::concept::k_array_view_impl(std::declval<T>()));
+  return Result::value;
+}
+
+/////////////
+// k_array //
+/////////////
+
+template <class T>
+constexpr bool k_array() {
+  return k_array_deep<T>() || k_array_view<T>();
+}
 }
 }
 }

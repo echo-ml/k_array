@@ -39,6 +39,7 @@ struct KArrayInitializer {
 
 template <class Derived, class Scalar, class Shape>
 struct KArrayConstInitializer : KArrayInitializer<Derived, Scalar, Shape> {
+  using KArrayInitializer<Derived, Scalar, Shape>::initialize;
   void initialize(InitializerMultilist<
       Scalar, shape_traits::num_dimensions<Shape>()> values) const {
     auto mutable_this = const_cast<KArrayConstInitializer*>(this);

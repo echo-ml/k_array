@@ -2,6 +2,7 @@
 #include <echo/k_array2/shape.h>
 #include <echo/k_array2/subshape.h>
 #include <echo/k_array2/k_array.h>
+#include <echo/k_array2/k_array_view.h>
 #include <echo/k_array2/shaped.h>
 #include <echo/test.h>
 
@@ -51,6 +52,28 @@ TEST_CASE("k_array2") {
   CHECK(a1(1,0) == 4);
   CHECK(a1(1,1) == 5);
   CHECK(a1(1,2) == 6);
+}
+
+TEST_CASE("static_k_array") {
+  KArray<double, ShapeC<2,3>, StaticAllocator<double>> a1;
+  a1(0, 0) = 2;
+  a1(0, 1) = 3;
+  a1(0, 2) = 4;
+
+  a1 = {{3, 4, 6}, {2, 1, 7}};
+}
+
+TEST_CASE("k_array_view2") {
+  double a[3][2] = {{0}};
+  KArrayView<double*, ShapeC<2,3>> v(&a[0][0], ShapeC<2,3>());
+  v = {{1, 3, 1}, {4, 3, 1}};
+  CHECK(a[0][0] == 1);
+  CHECK(a[1][0] == 3);
+  CHECK(a[2][0] == 1);
+
+  CHECK(a[0][1] == 4);
+  CHECK(a[1][1] == 3);
+  CHECK(a[2][1] == 1);
 }
 
 TEST_CASE("get_num_elements") {
