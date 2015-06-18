@@ -51,6 +51,7 @@ class Dimensionality
 
 namespace detail {
 namespace dimensionality {
+
 template <std::size_t... Indexes, class Extent>
 auto make_dimensionality_impl(
     std::index_sequence<Indexes...>,
@@ -58,6 +59,15 @@ auto make_dimensionality_impl(
   return Dimensionality<repeat_type_c<Indexes, index_t>...>(
       std::get<Indexes>(extents)...);
 }
+
+template<std::size_t... Indexes, class... Extents>
+auto make_dimensionality_impl(
+  std::index_sequence<Indexes...>,
+  const htl::Tuple<Extents...>& extents)
+{
+  return Dimensionality<Extents...>(htl::get<Indexes>(extents)...);
+}
+
 }
 }
 
@@ -91,6 +101,14 @@ template <class... Extents,
           CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_dimensionality(Extents... extents) {
   return Dimensionality<Extents...>(extents...);
+}
+
+template<class... Extents,
+  CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
+auto make_dimensionality(const htl::Tuple<Extents...>& extents) {
+  return detail::dimensionality::make_dimensionality_impl(
+    std::index_sequence_for<Extents...>(),
+    extents);
 }
 
 ////////////////
