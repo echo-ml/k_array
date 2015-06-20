@@ -14,6 +14,13 @@ namespace slice {
 struct all_t {};
 constexpr all_t all{};
 
+namespace concept {
+template <class T>
+constexpr bool all() {
+  return std::is_same<T, all_t>::value;
+}
+}
+
 ///////////
 // Range //
 ///////////
@@ -29,6 +36,13 @@ class Range {
 };
 
 inline auto range(index_t a, index_t b) { return Range(a, b); }
+
+namespace concept {
+template <class T>
+constexpr bool range() {
+  return std::is_same<T, Range>::value;
+}
+}
 
 //////////////////
 // CountedRange //
@@ -50,60 +64,65 @@ template <class Extent>
 auto counted_range(index_t a, Extent extent) {
   return CountedRange<Extent>(a, extent);
 }
+
+namespace concept {
+namespace detail {
+namespace slice {
+template <class Extent>
+auto counted_range_impl(CountedRange<Extent> && ) -> std::true_type;
+
+template <class T>
+auto counted_range_impl(T && ) -> std::false_type;
 }
+}
+
+template <class T>
+constexpr bool counted_range() {
+  using Result = decltype(detail::slice::counted_range_impl(std::declval<T>()));
+  return Result::value;
+}
+}
+}
+
+namespace concept {
+
+///////////
+// slice //
+///////////
+
+template <class T>
+constexpr bool slice() {
+  return slice::concept::all<T>() || slice::concept::range<T>() ||
+         slice::concept::counted_range<T>() ||
+         std::is_convertible<T, index_t>();
+}
+
+///////////////////
+// proper_slices //
+///////////////////
 
 namespace detail {
 namespace slice {
 
-struct empty_dimension {};
-
-template <class Extent>
-auto get_subdimension(Extent extent, k_array::slice::all_t) {
-  return extent;
+template <class... Slices>
+auto proper_slices_impl(Slices...) {
+  return std::integral_constant<
+      bool, and_c<std::is_convertible<Slices, index_t>::value...>()>();
 }
 
-template <class Extent>
-auto get_subdimension(Extent, const k_array::slice::Range& range) {
-  return range.b() - range.a();
+template <class... SlicesRest>
+auto proper_slices_impl(k_array::slice::all_t, SlicesRest... slices_rest) {
+  return proper_slices_impl(slices_rest...);
 }
-
-template <class Extent>
-auto get_subdimension(Extent, index_t) {
-  return empty_dimension();
-}
-
-template <class Extent1, class Extent2>
-auto get_subdimension(
-    Extent1, const k_array::slice::CountedRange<Extent2>& counted_range) {
-  return counted_range.extent();
-}
-
-template <class Shape, class Slices>
-auto get_subdimensions(const Shape& shape, const Slices& slices) {
-  auto subdimensions = htl::map([](auto extent, auto slice) {
-    return get_subdimension(extent, slice);
-  }, shape.extents(), slices);
-  return make_dimensionality(htl::remove_if([](auto dimension) {
-    return htl::integral_constant<
-        bool, std::is_same<decltype(dimension), empty_dimension>::value>();
-  }, subdimensions));
-}
-
-template<class Shape, class Slices>
-auto get_subdimension_indexes_impl(const Slices& slices) {
-  auto range =
-      htl::make_index_sequence<htl::tuple_traits::num_elements<Slices>()>();
-
-}
-
 }
 }
 
-///////////////////
-// make_subshape //
-///////////////////
-
-template <class Shape, class... Slices>
-auto make_subshape(const Shape& shape, Slices...) {}
+template <class... Slices>
+constexpr bool proper_slices() {
+  using Result =
+      decltype(detail::slice::proper_slices_impl(std::declval<Slices>()...));
+  return Result::value;
+}
+}
 }
 }

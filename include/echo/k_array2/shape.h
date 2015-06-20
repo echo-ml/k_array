@@ -46,6 +46,12 @@ auto make_shape(Extents... extents) {
   return Shape<Extents...>(extents...);
 }
 
+template <class... Extents,
+          CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
+auto make_shape(const htl::Tuple<Extents...>& extents) {
+  return reinterpret_cast<const Shape<Extents...>&>(extents);
+}
+
 ////////////////
 // get_stride //
 ////////////////
