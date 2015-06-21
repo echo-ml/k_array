@@ -26,19 +26,6 @@ TEST_CASE("subdimension_indexes") {
   type_equal<T1, htl::index_sequence<1, 2>>();
 }
 
-TEST_CASE("get_strides") {
-  auto shape1 = make_shape(2_index, 3_index, 5, 7);
-
-  auto strides1 = echo::k_array::detail::make_subshape::get_strides(
-      htl::index_sequence<1, 3>(), shape1);
-  type_equal<decltype(strides1), htl::Tuple<StaticIndex<2>, index_t>>();
-  CHECK(htl::get<1>(strides1) == 30);
-
-  auto strides2 = echo::k_array::detail::make_subshape::get_strides(
-      htl::index_sequence<0>(), shape1);
-  type_equal<decltype(strides2), htl::Tuple<StaticIndex<1>>>();
-}
-
 TEST_CASE("make_subshape2") {
   auto shape1 = make_shape(2_index, 3_index, 5, 7);
 

@@ -39,7 +39,8 @@ auto get_subdimension(
 template <class Shape, class Slices>
 auto get_subdimensions(const Shape& shape, const Slices& make_subshapes) {
   auto subdimensions = htl::map([](auto extent, auto make_subshape) {
-    return k_array::detail::make_subshape::get_subdimension(extent, make_subshape);
+    return k_array::detail::make_subshape::get_subdimension(extent,
+                                                            make_subshape);
   }, shape.extents(), make_subshapes);
   return make_dimensionality(htl::remove_if([](auto dimension) {
     return htl::integral_constant<
@@ -58,15 +59,15 @@ auto get_subdimensions(const Shape& shape, const Slices& make_subshapes) {
 namespace detail {
 namespace make_subshape {
 
-template<class... Slices>
+template <class... Slices>
 auto get_subdimension_indexes_impl(const htl::Tuple<Slices...>& slices) {
-  auto indexes =
-      htl::make_index_sequence<sizeof...(Slices)>();
+  auto indexes = htl::make_index_sequence<sizeof...(Slices)>();
   auto is_null_slice = [&](auto index) {
     return htl::integral_constant<
-        bool, std::is_same<htl::tuple_traits::element_type<
-                               decltype(index)::value, uncvref_t<decltype(slices)>>,
-                           index_t>::value>();
+        bool,
+        std::is_same<htl::tuple_traits::element_type<
+                         decltype(index)::value, uncvref_t<decltype(slices)>>,
+                     index_t>::value>();
   };
   return htl::remove_if(is_null_slice, indexes);
 }
@@ -99,7 +100,7 @@ auto get_strides_impl(htl::index_sequence<I>, StrideI, const Functor& functor,
 
 template <std::size_t I, std::size_t J, std::size_t... IndexesRest,
           class StrideI, class Functor, class Shape>
-auto get_strides_impl(htl::index_sequence<I, J, IndexesRest...>,
+auto get_strides_impl(htl::integer_sequence<std::size_t, I, J, IndexesRest...>,
                       StrideI stride_i, const Functor& functor,
                       const Shape& shape) {
   auto stride_j = get_stride<I, J>(stride_i, shape);
@@ -110,7 +111,8 @@ auto get_strides_impl(htl::index_sequence<I, J, IndexesRest...>,
 }
 
 template <std::size_t... Indexes, class Shape>
-auto get_strides(htl::index_sequence<Indexes...>, const Shape& shape) {
+auto get_strides_impl(htl::integer_sequence<std::size_t, Indexes...>,
+                      const Shape& shape) {
   auto functor = [](auto... strides) { return htl::make_tuple(strides...); };
   return get_strides_impl(htl::index_sequence<0, Indexes...>(), 1_index,
                           functor, shape);
@@ -118,7 +120,7 @@ auto get_strides(htl::index_sequence<Indexes...>, const Shape& shape) {
 
 template <class Shape, class Slices>
 auto get_strides(const Shape& shape, const Slices& slices) {
-  return get_strides(SubdimensionIndexes<Slices>(), shape);
+  return get_strides_impl(SubdimensionIndexes<Slices>(), shape);
 }
 }
 }
