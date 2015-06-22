@@ -1,7 +1,6 @@
 #pragma once
 
 #include <echo/k_array2/k_array_fwd.h>
-#include <echo/static_allocator.h>
 #include <echo/k_array2/k_array_accessor.h>
 #include <echo/k_array2/concept.h>
 #include <echo/k_array2/k_array_traits.h>
@@ -136,15 +135,15 @@ class KArray : htl::Pack<Shape>,
 };
 
 template <class T, class Shape, int Alignment>
-class KArray<T, Shape, StaticAllocator<T, Alignment>>
+class KArray<T, Shape, memory::StaticAllocator<T, Alignment>>
     : htl::Pack<Shape>,
-      static_allocator_traits::buffer_type<StaticAllocator<T, Alignment>,
-                                           decltype(get_num_elements(
-                                               Shape()))::value>,
-      public KArrayAccessor<KArray<T, Shape, StaticAllocator<T, Alignment>>,
-                            Shape>,
-      public KArrayInitializer<KArray<T, Shape, StaticAllocator<T, Alignment>>,
-                               T, Shape> {
+      static_allocator_traits::buffer_type<
+          memory::StaticAllocator<T, Alignment>,
+          decltype(get_num_elements(Shape()))::value>,
+      public KArrayAccessor<
+          KArray<T, Shape, memory::StaticAllocator<T, Alignment>>, Shape>,
+      public KArrayInitializer<
+          KArray<T, Shape, memory::StaticAllocator<T, Alignment>>, T, Shape> {
   CONCEPT_ASSERT(concept::contiguous_shape<Shape>(),
                  "shape must be contiguous");
   CONCEPT_ASSERT(concept::static_shape<Shape>(),
@@ -156,13 +155,12 @@ class KArray<T, Shape, StaticAllocator<T, Alignment>>
   using reference = T&;
   using const_reference = const T&;
   using value_type = T;
-  using memory_backend_tag =
-      memory_backend_traits::memory_backend_tag<StaticAllocator<T, Alignment>>;
+  using memory_backend_tag = memory_backend_traits::memory_backend_tag<
+      memory::StaticAllocator<T, Alignment>>;
 
-  using Buffer =
-      static_allocator_traits::buffer_type<StaticAllocator<T, Alignment>,
-                                           decltype(get_num_elements(
-                                               Shape()))::value>;
+  using Buffer = static_allocator_traits::buffer_type<
+      memory::StaticAllocator<T, Alignment>,
+      decltype(get_num_elements(Shape()))::value>;
 
   using Buffer::data;
   using Buffer::const_data;

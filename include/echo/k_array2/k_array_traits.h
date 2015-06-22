@@ -1,7 +1,7 @@
 #pragma once
 
 #include <echo/k_array2/shape_traits.h>
-#include <echo/concept2.h>
+#include <echo/concept.h>
 
 namespace echo {
 namespace k_array_traits {

@@ -43,19 +43,19 @@ TEST_CASE("concept2") {
 }
 
 TEST_CASE("k_array2") {
-  KArray<double, ShapeC<2,3>> a1;
-  a1 = {{1, 2, 3}, {4,5,6}};
-  CHECK(a1(0,0) == 1);
-  CHECK(a1(0,1) == 2);
-  CHECK(a1(0,2) == 3);
+  KArray<double, ShapeC<2, 3>> a1;
+  a1 = {{1, 2, 3}, {4, 5, 6}};
+  CHECK(a1(0, 0) == 1);
+  CHECK(a1(0, 1) == 2);
+  CHECK(a1(0, 2) == 3);
 
-  CHECK(a1(1,0) == 4);
-  CHECK(a1(1,1) == 5);
-  CHECK(a1(1,2) == 6);
+  CHECK(a1(1, 0) == 4);
+  CHECK(a1(1, 1) == 5);
+  CHECK(a1(1, 2) == 6);
 }
 
 TEST_CASE("static_k_array") {
-  KArray<double, ShapeC<2,3>, StaticAllocator<double>> a1;
+  KArray<double, ShapeC<2, 3>, memory::StaticAllocator<double>> a1;
   a1(0, 0) = 2;
   a1(0, 1) = 3;
   a1(0, 2) = 4;
@@ -65,7 +65,7 @@ TEST_CASE("static_k_array") {
 
 TEST_CASE("k_array_view2") {
   double a[3][2] = {{0}};
-  KArrayView<double*, ShapeC<2,3>> v(&a[0][0], ShapeC<2,3>());
+  KArrayView<double*, ShapeC<2, 3>> v(&a[0][0], ShapeC<2, 3>());
   v = {{1, 3, 1}, {4, 3, 1}};
   CHECK(a[0][0] == 1);
   CHECK(a[1][0] == 3);
@@ -90,17 +90,17 @@ TEST_CASE("num_free_dimensions2") {
   Dimensionality<StaticIndex<1>, StaticIndex<2>> d2;
   Dimensionality<StaticIndex<1>, StaticIndex<1>> d3;
 
-  CHECK(dimensionality_traits::num_free_dimensions<decltype(d1)>()==2);
-  CHECK(dimensionality_traits::num_free_dimensions<decltype(d2)>()==1);
-  CHECK(dimensionality_traits::num_free_dimensions<decltype(d3)>()==0);
+  CHECK(dimensionality_traits::num_free_dimensions<decltype(d1)>() == 2);
+  CHECK(dimensionality_traits::num_free_dimensions<decltype(d2)>() == 1);
+  CHECK(dimensionality_traits::num_free_dimensions<decltype(d3)>() == 0);
 }
 
 TEST_CASE("free_dimension2") {
   Dimensionality<StaticIndex<1>, index_t> d1;
-  Dimensionality< StaticIndex<2>> d2;
+  Dimensionality<StaticIndex<2>> d2;
 
-  CHECK(dimensionality_traits::free_dimension<decltype(d1)>()==1);
-  CHECK(dimensionality_traits::free_dimension<decltype(d2)>()==0);
+  CHECK(dimensionality_traits::free_dimension<decltype(d1)>() == 1);
+  CHECK(dimensionality_traits::free_dimension<decltype(d2)>() == 0);
 }
 
 TEST_CASE("get_stride") {
@@ -130,15 +130,11 @@ TEST_CASE("subshape - get_1d_index") {
 }
 
 struct Shaped1 {
-  auto shape() const {
-    return ShapeC<3,5>();
-  }
+  auto shape() const { return ShapeC<3, 5>(); }
 };
 
 struct Dimensioned1 {
-  auto dimensionality() const {
-    return DimensionalityC<7,8>();
-  }
+  auto dimensionality() const { return DimensionalityC<7, 8>(); }
 };
 
 TEST_CASE("shaped") {

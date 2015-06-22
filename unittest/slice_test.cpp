@@ -39,17 +39,14 @@ TEST_CASE("make_subshape2") {
   CHECK(get_extent<1>(subshape1) == 1);
   CHECK(get_stride<2>(subshape1) == 30);
 
-  auto subshape2 =
-    make_subshape(shape1, slice::all, slice::all, 2, 3);
+  auto subshape2 = make_subshape(shape1, slice::all, slice::all, 2, 3);
 
   type_equal<decltype(subshape2), Shape<StaticIndex<2>, StaticIndex<3>>>();
 }
 
 TEST_CASE("make_subshape3") {
-  auto shape1 = make_subshape(
-    make_dimensionality(3_index, 2_index),
-    htl::make_tuple(5_index, 20)
-  );
+  auto shape1 = make_subshape(make_dimensionality(3_index, 2_index),
+                              make_strides(5_index, 20));
   auto subshape1 =
       make_subshape(shape1, slice::counted_range(0, 2_index), slice::all);
 

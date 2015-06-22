@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/k_array2/concept.h>
+#include <echo/k_array2/extent.h>
 
 namespace echo {
 namespace k_array {
@@ -29,6 +30,16 @@ class Subshape : public Dimensionality,
     return htl::unpack<detail::subshape::strides_tag>(*this);
   }
 };
+
+//////////////////
+// make_strides //
+//////////////////
+
+template <class... Strides,
+          CONCEPT_REQUIRES(and_c<concept::extent<Strides>()...>())>
+auto make_strides(Strides... strides) {
+  return htl::Tuple<decltype(make_extent(strides))...>(make_extent(strides)...);
+}
 
 ///////////////////
 // make_subshape //

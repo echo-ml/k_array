@@ -15,13 +15,18 @@ namespace make_subshape {
 
 struct empty_dimension {};
 
-template <class Extent>
+template <class Extent, CONCEPT_REQUIRES(concept::static_extent<Extent>())>
 auto get_subdimension(Extent extent, slice::all_t) {
   return extent;
 }
 
+template <class Extent, CONCEPT_REQUIRES(concept::dynamic_extent<Extent>())>
+index_t get_subdimension(Extent extent, slice::all_t) {
+  return extent;
+}
+
 template <class Extent>
-auto get_subdimension(Extent, const k_array::slice::Range& range) {
+index_t get_subdimension(Extent, const k_array::slice::Range& range) {
   return range.b() - range.a();
 }
 
@@ -30,8 +35,16 @@ auto get_subdimension(Extent, index_t) {
   return empty_dimension();
 }
 
-template <class Extent1, class Extent2>
+template <class Extent1, class Extent2,
+          CONCEPT_REQUIRES(concept::static_extent<Extent2>())>
 auto get_subdimension(
+    Extent1, const k_array::slice::CountedRange<Extent2>& counted_range) {
+  return counted_range.extent();
+}
+
+template <class Extent1, class Extent2,
+          CONCEPT_REQUIRES(concept::dynamic_extent<Extent2>())>
+index_t get_subdimension(
     Extent1, const k_array::slice::CountedRange<Extent2>& counted_range) {
   return counted_range.extent();
 }
@@ -64,10 +77,8 @@ auto get_subdimension_indexes_impl(const htl::Tuple<Slices...>& slices) {
   auto indexes = htl::make_index_sequence<sizeof...(Slices)>();
   auto is_null_slice = [&](auto index) {
     return htl::integral_constant<
-        bool,
-        std::is_same<htl::tuple_traits::element_type<
-                         decltype(index)::value, uncvref_t<decltype(slices)>>,
-                     index_t>::value>();
+        bool, k_array::concept::dynamic_extent<htl::tuple_traits::element_type<
+                  decltype(index)::value, uncvref_t<decltype(slices)>>>()>();
   };
   return htl::remove_if(is_null_slice, indexes);
 }
@@ -88,8 +99,8 @@ namespace make_subshape {
 template <std::size_t I, std::size_t J, class StrideI, class Shape>
 auto get_stride(StrideI stride_i, const Shape& shape) {
   decltype(auto) extents_make_subshape = htl::slice<I, J>(shape.extents());
-  return htl::left_fold(functional::multiplies, stride_i,
-                        extents_make_subshape);
+  return make_extent(
+      htl::left_fold(functional::multiplies, stride_i, extents_make_subshape));
 }
 
 template <std::size_t I, class StrideI, class Functor, class Shape>

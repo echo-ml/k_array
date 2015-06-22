@@ -1,6 +1,7 @@
 #pragma once
 
 #include <echo/k_array2/concept.h>
+#include <echo/k_array2/extent.h>
 #include <echo/htl.h>
 #include <array>
 
@@ -60,14 +61,12 @@ auto make_dimensionality_impl(
       std::get<Indexes>(extents)...);
 }
 
-template<std::size_t... Indexes, class... Extents>
-auto make_dimensionality_impl(
-  std::index_sequence<Indexes...>,
-  const htl::Tuple<Extents...>& extents)
-{
-  return Dimensionality<Extents...>(htl::get<Indexes>(extents)...);
+template <std::size_t... Indexes, class... Extents>
+auto make_dimensionality_impl(std::index_sequence<Indexes...>,
+                              const htl::Tuple<Extents...>& extents) {
+  return Dimensionality<decltype(make_extent(htl::get<Indexes>(extents)))...>(
+      make_extent(htl::get<Indexes>(extents))...);
 }
-
 }
 }
 
@@ -100,15 +99,15 @@ using DimensionalityC = Dimensionality<ExtentC<ExtentsC>...>;
 template <class... Extents,
           CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_dimensionality(Extents... extents) {
-  return Dimensionality<Extents...>(extents...);
+  return Dimensionality<decltype(make_extent(extents))...>(
+      make_extent(extents)...);
 }
 
-template<class... Extents,
-  CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
+template <class... Extents,
+          CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_dimensionality(const htl::Tuple<Extents...>& extents) {
   return detail::dimensionality::make_dimensionality_impl(
-    std::index_sequence_for<Extents...>(),
-    extents);
+      std::index_sequence_for<Extents...>(), extents);
 }
 
 ////////////////

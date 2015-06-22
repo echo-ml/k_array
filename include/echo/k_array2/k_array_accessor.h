@@ -1,7 +1,7 @@
 #pragma once
 
 #include <echo/k_array2/shape_traits.h>
-#include <echo/utility/repeat_type.h>
+#include <echo/repeat_type.h>
 #include <echo/access_mode.h>
 #include <iterator>
 

@@ -3,7 +3,7 @@
 #include <echo/k_array2/k_array_fwd.h>
 #include <echo/k_array2/k_array_view_fwd.h>
 #include <echo/index.h>
-#include <echo/concept2.h>
+#include <echo/concept.h>
 #include <echo/htl.h>
 
 namespace echo {
@@ -19,28 +19,6 @@ template <class Dimensionality, class Strides>
 class Subshape;
 
 namespace concept {
-
-//////////////////
-// static_index //
-//////////////////
-
-namespace detail {
-namespace concept {
-
-template <index_t I>
-auto static_index_impl(StaticIndex<I> && ) -> std::true_type;
-
-template <class T>
-auto static_index_impl(T && ) -> std::false_type;
-}
-}
-
-template <class T>
-constexpr bool static_index() {
-  using Result =
-      decltype(detail::concept::static_index_impl(std::declval<T>()));
-  return Result::value;
-}
 
 ////////////
 // extent //
@@ -62,6 +40,37 @@ template <class T>
 constexpr bool extent() {
   using Result = decltype(detail::concept::extent_impl(std::declval<T>()));
   return Result::value;
+}
+
+//////////////////
+// static_extent //
+//////////////////
+
+namespace detail {
+namespace concept {
+
+template <index_t I>
+auto static_extent_impl(StaticIndex<I> && ) -> std::true_type;
+
+template <class T>
+auto static_extent_impl(T && ) -> std::false_type;
+}
+}
+
+template <class T>
+constexpr bool static_extent() {
+  using Result =
+      decltype(detail::concept::static_extent_impl(std::declval<T>()));
+  return Result::value;
+}
+
+////////////////////
+// dynamic_extent //
+////////////////////
+
+template <class T>
+constexpr bool dynamic_extent() {
+  return !static_extent<T>() && extent<T>();
 }
 
 /////////////////
