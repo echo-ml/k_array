@@ -11,5 +11,8 @@ auto make_extent(StaticIndex<I> i) {
 }
 
 inline index_t make_extent(index_t i) { return i; }
+
+template<class T>
+using extent_type = decltype(make_extent(std::declval<T>()));
 }
 }

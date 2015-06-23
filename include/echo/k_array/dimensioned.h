@@ -1,6 +1,6 @@
 #pragma once
 
-#include <echo/k_array2/concept.h>
+#include <echo/k_array/concept.h>
 
 namespace echo {
 namespace k_array {

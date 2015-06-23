@@ -1,6 +1,8 @@
 #pragma once
 
-#include <echo/k_array/shape.h>
+#include <echo/k_array/shape_traits.h>
+#include <echo/repeat_type.h>
+#include <echo/access_mode.h>
 #include <iterator>
 
 namespace echo {
@@ -19,14 +21,14 @@ struct KArrayConstAccessorImpl {};
 template <std::size_t... Indexes, class Derived, class Shape>
 struct KArrayConstAccessorImpl<std::index_sequence<Indexes...>, Derived,
                                Shape> {
-  decltype(auto) operator()(
-      std::enable_if_t<true || Indexes, index_t>... indexes) const {
+  decltype(auto) operator()(access_mode::readonly_t,
+                            repeat_type_c<Indexes, index_t>... indexes) const {
+    const Derived& derived = static_cast<const Derived&>(*this);
+    return *(derived.const_data() + get_1d_index(derived.shape(), indexes...));
+  }
+  decltype(auto) operator()(repeat_type_c<Indexes, index_t>... indexes) const {
     const Derived& derived = static_cast<const Derived&>(*this);
     return *(derived.data() + get_1d_index(derived.shape(), indexes...));
-  }
-  decltype(auto) operator[](echo::Index<1> index) const {
-    const Derived& derived = static_cast<const Derived&>(*this);
-    return *(derived.data() + index);
   }
 };
 }
@@ -52,17 +54,17 @@ template <std::size_t... Indexes, class Derived, class Shape>
 struct KArrayAccessorImpl<std::index_sequence<Indexes...>, Derived, Shape>
     : KArrayConstAccessor<Derived, Shape> {
   using KArrayConstAccessor<Derived, Shape>::operator();
-  using KArrayConstAccessor<Derived, Shape>::operator[];
-  decltype(auto) operator()(
-      std::enable_if_t<true || Indexes, index_t>... indexes) {
+  decltype(auto) operator()(access_mode::readonly_t,
+                            repeat_type_c<Indexes, index_t>... indexes) {
+    Derived& derived = static_cast<Derived&>(*this);
+    return const_cast<decltype(*derived.data())>(
+        const_cast<const KArrayAccessorImpl&>(*this).operator()(
+            access_mode::readonly, indexes...));
+  }
+  decltype(auto) operator()(repeat_type_c<Indexes, index_t>... indexes) {
     Derived& derived = static_cast<Derived&>(*this);
     return const_cast<decltype(*derived.data())>(
         const_cast<const KArrayAccessorImpl&>(*this).operator()(indexes...));
-  }
-  decltype(auto) operator[](echo::Index<1> index) {
-    Derived& derived = static_cast<Derived&>(*this);
-    return const_cast<decltype(*derived.data())>(
-        const_cast<const KArrayAccessorImpl&>(*this).operator[](index));
   }
 };
 }

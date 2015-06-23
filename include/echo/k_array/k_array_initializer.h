@@ -1,7 +1,7 @@
 #pragma once
 
-#include <echo/k_array2/shape_traits.h>
-#include <echo/k_array2/dimensioned.h>
+#include <echo/k_array/shape_traits.h>
+#include <echo/k_array/dimensioned.h>
 #include <echo/utility/initializer_multilist.h>
 #include <stdexcept>
 

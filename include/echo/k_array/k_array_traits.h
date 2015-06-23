@@ -1,9 +1,7 @@
 #pragma once
 
-#include <echo/k_array/shape.h>
-#include <echo/k_array/shaped_expression.h>
 #include <echo/k_array/shape_traits.h>
-#include <echo/concept2.h>
+#include <echo/concept.h>
 
 namespace echo {
 namespace k_array_traits {
@@ -16,40 +14,5 @@ using const_pointer = decltype(std::declval<KArray>().const_data());
 
 template <class KArray>
 using value_type = iterator_traits::value_type<pointer<KArray>>;
-
-template <class KArray>
-using shape_type = uncvref_t<decltype(std::declval<KArray>().shape())>;
-
-template <int I, class KArray>
-using extent_type = shape_traits::extent_type<I, shape_type<KArray>>;
-
-template <int I, class KArray>
-using stride_type = decltype(k_array::get_stride<I>(std::declval<KArray>()));
-
-template <class KArray>
-using dimensionality = shape_traits::dimensionality<shape_type<KArray>>;
-
-template <class KArray>
-constexpr auto num_dimensions()
-    -> decltype(shape_traits::num_dimensions<shape_type<KArray>>()) {
-  return shape_traits::num_dimensions<shape_type<KArray>>();
 }
-
-template<class KArray>
-constexpr auto num_free_dimensions()
-  -> decltype(
-    shape_traits::num_free_dimensions<shape_type<KArray>>()) 
-{
-    return shape_traits::num_free_dimensions<shape_type<KArray>>() ;
 }
-
-template<class KArray>
-constexpr auto free_dimension()
-  -> decltype(
-    shape_traits::free_dimension<shape_type<KArray>>()) 
-{
-    return shape_traits::free_dimension<shape_type<KArray>>() ;
-}
-
-}  // namespace k_array_traits
-}  // namespace echo

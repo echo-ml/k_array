@@ -1,33 +1,62 @@
 #pragma once
 
-#include <echo/k_array/dimensionality.h>
-#include <echo/concept2.h>
-#include <echo/const_algorithm.h>
+#define DETAIL_NS detail_concept
+
+#include <echo/k_array/k_array_fwd.h>
+#include <echo/k_array/k_array_view_fwd.h>
+#include <echo/index.h>
+#include <echo/concept.h>
+#include <echo/htl.h>
 
 namespace echo {
 namespace k_array {
+
+template <class... Extents>
+class Dimensionality;
+
+template <class... Extents>
+class Shape;
+
+template <class Dimensionality, class Strides>
+class Subshape;
+
 namespace concept {
 
-using echo::concept::Concept;
-using echo::concept::models;
+////////////
+// extent //
+////////////
+
+namespace DETAIL_NS {
+template <index_t I>
+auto extent_impl(StaticIndex<I>) -> std::true_type;
+
+inline auto extent_impl(index_t) -> std::true_type;
+
+inline auto extent_impl(...) -> std::false_type;
+}
+
+template <class T>
+constexpr bool extent() {
+  using Result = decltype(DETAIL_NS::extent_impl(std::declval<T>()));
+  return Result::value;
+}
 
 ///////////////////
 // static_extent //
 ///////////////////
 
-namespace detail {
-namespace concept {
-template <IndexInteger N, CONCEPT_REQUIRES(N > 0)>
-auto static_extent_impl(StaticIndex<N>) -> std::true_type;
+namespace DETAIL_NS {
+template <index_t I>
+auto static_extent_impl(StaticIndex<I> && ) -> std::true_type;
 
-auto static_extent_impl(...) -> std::false_type;
-}  // namespace concept
-}  // namespace detail
+template <class T>
+auto static_extent_impl(T && ) -> std::false_type;
+}
 
 template <class T>
 constexpr bool static_extent() {
   using Result =
-      decltype(detail::concept::static_extent_impl(std::declval<T>()));
+      decltype(DETAIL_NS::static_extent_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -37,110 +66,95 @@ constexpr bool static_extent() {
 
 template <class T>
 constexpr bool dynamic_extent() {
-  return std::is_convertible<T, index_t>::value && std::is_integral<T>::value &&
-         !static_extent<T>();
+  return !static_extent<T>() && extent<T>();
 }
 
-////////////
-// extent //
-////////////
+/////////////////
+// index_tuple //
+/////////////////
+
+namespace DETAIL_NS {
+template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
+auto index_tuple_impl(htl::Tuple<Extents...> && ) -> std::true_type;
 
 template <class T>
-constexpr bool extent() {
-  return static_extent<T>() || dynamic_extent<T>();
+auto index_timple_impl(T && ) -> std::false_type;
+}
+
+template <class T>
+constexpr bool index_tuple() {
+  using Result = decltype(DETAIL_NS::index_tuple_impl(std::declval<T>()));
+  return Result::value;
 }
 
 ////////////////////
 // dimensionality //
 ////////////////////
 
-namespace detail {
-namespace concept {
-template <IndexInteger... Values>
-auto dimensionality_impl(StaticIndex<Values...>) -> std::integral_constant<
-    bool, const_algorithm::and_(fatal::constant_sequence<
-              bool, (Values > 0) || (Values == Dimension::Dynamic())...>()) &&
-              (sizeof...(Values) > 0)>;
+namespace DETAIL_NS {
+template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
+auto dimensionality_impl(Dimensionality<Extents...> && ) -> std::true_type;
 
-inline std::false_type dimensionality_impl(...);
-}  // namespace concept
-}  // namespace detail
+template <class T>
+auto dimensionality_impl(T && ) -> std::false_type;
+
+template <index_t... Indexes>
+auto static_dimensionality_impl(Dimensionality<StaticIndex<Indexes>...> && )
+    -> std::true_type;
+
+template <class T>
+auto static_dimensionality_impl(T && ) -> std::false_type;
+}
 
 template <class T>
 constexpr bool dimensionality() {
-  return decltype(detail::concept::dimensionality_impl(std::declval<T>())){};
-}
-
-/////////////////////
-// stride_sequence //
-/////////////////////
-
-template <class T>
-constexpr bool stride_sequence() {
-  return dimensionality<T>();
-}
-
-///////////////////
-// shape_strides //
-///////////////////
-
-namespace detail {
-namespace concept {
-struct ShapeStrides : Concept {
-  template <class T>
-  auto require(T&& shape_strides)
-      -> list<stride_sequence<typename T::StrideSequence>(),
-              valid<decltype(shape_strides.template dynamic_stride<0>())>()>;
-};
-}
+  using Result =
+      decltype(DETAIL_NS::dimensionality_impl(std::declval<T>()));
+  return Result::value;
 }
 
 template <class T>
-constexpr bool shape_strides() {
-  return models<detail::concept::ShapeStrides, T>();
+constexpr bool static_dimensionality() {
+  using Result =
+      decltype(DETAIL_NS::static_dimensionality_impl(std::declval<T>()));
+  return Result::value;
 }
 
 //////////////////////
 // contiguous_shape //
 //////////////////////
 
-namespace detail {
-namespace concept {
-struct ContiguousShape : Concept {
-  template <class T>
-  auto require(T&& shape)
-      -> list<dimensionality<typename T::Dimensionality>(), !shape_strides<T>(),
-              valid<decltype(shape.template dynamic_extent<0>())>(),
-              same<T, uncvref_t<decltype(get_extent_shape(shape))>>()>;
-};
-}  // namespace concept
-}  // namespace detail
+namespace DETAIL_NS {
+template <class... Extents>
+auto contiguous_shape_impl(Shape<Extents...> && ) -> std::true_type;
+
+template <class T>
+auto contiguous_shape_impl(T && ) -> std::false_type;
+}
 
 template <class T>
 constexpr bool contiguous_shape() {
-  return models<detail::concept::ContiguousShape, T>();
+  using Result =
+      decltype(DETAIL_NS::contiguous_shape_impl(std::declval<T>()));
+  return Result::value;
 }
 
 //////////////
 // subshape //
 //////////////
 
-namespace detail {
-namespace concept {
-struct Subshape : Concept {
-  template <class T>
-  auto require(T&& shape)
-      -> list<dimensionality<typename T::Dimensionality>(), shape_strides<T>(),
-              valid<decltype(shape.template dynamic_extent<0>())>(),
-              contiguous_shape<uncvref_t<decltype(get_extent_shape(shape))>>(),
-              T::Dimensionality::size == T::StrideSequence::size>;
-};
-}  // namespace concept
-}  // namespace detail
+namespace DETAIL_NS {
+template <class Dimensionality, class Strides>
+auto subshape_impl(Subshape<Dimensionality, Strides> && ) -> std::true_type;
+
+template <class T>
+auto subshape_impl(T && ) -> std::false_type;
+}
 
 template <class T>
 constexpr bool subshape() {
-  return models<detail::concept::Subshape, T>();
+  using Result = decltype(DETAIL_NS::subshape_impl(std::declval<T>()));
+  return Result::value;
 }
 
 ///////////
@@ -149,153 +163,109 @@ constexpr bool subshape() {
 
 template <class T>
 constexpr bool shape() {
-  return subshape<T>() || contiguous_shape<T>();
-}
-
-/////////////
-// k_shape //
-/////////////
-
-namespace detail {
-namespace concept {
-struct KShape : Concept {
-  template <class K, class T>
-  auto require(K&&, T && )
-      -> list<shape<T>(), T::Dimensionality::size == K::value>;
-};
-}  // namespace concept
-}  // namespace detail
-
-template <int K, class T>
-constexpr bool k_shape() {
-  return models<detail::concept::KShape, std::integral_constant<int, K>, T>();
-}
-
-////////////////////////
-// contiguous_k_shape //
-////////////////////////
-
-template <int K, class T>
-constexpr bool contiguous_k_shape() {
-  return contiguous_shape<T>() && k_shape<K, T>();
+  return contiguous_shape<T>() || subshape<T>();
 }
 
 //////////////////
 // static_shape //
 //////////////////
 
-namespace detail {
-namespace concept {
+namespace DETAIL_NS {
 struct StaticShape : Concept {
   template <class T>
-  auto require(T && ) -> list<
-      shape<T>(), !const_algorithm::contains(typename T::Dimensionality(),
-                                             Dimension::Dynamic())>;
+  auto require(T&& shape) -> list<
+      k_array::concept::shape<T>(),
+      static_dimensionality<uncvref_t<decltype(shape.dimensionality())>>()>;
 };
-}  // namespace concept
-}  // namespace detail
+}
 
 template <class T>
 constexpr bool static_shape() {
-  return models<detail::concept::StaticShape, T>();
+  return models<DETAIL_NS::StaticShape, T>();
 }
 
 ////////////
 // shaped //
 ////////////
 
-namespace detail {
-namespace concept {
+namespace DETAIL_NS {
 struct Shaped : Concept {
   template <class T>
   auto require(T&& x) -> list<shape<uncvref_t<decltype(x.shape())>>()>;
 };
-}  // namespace concept
-}  // namespace detail
+}
 
 template <class T>
 constexpr bool shaped() {
-  return models<detail::concept::Shaped, T>();
+  return models<DETAIL_NS::Shaped, T>();
 }
 
-///////////////////
-// writable_data //
-///////////////////
+/////////////////
+// dimensioned //
+/////////////////
 
-namespace detail {
-namespace concept {
-struct WritableData : Concept {
+namespace DETAIL_NS {
+struct Dimensioned : Concept {
   template <class T>
-  auto require(T&& x) -> list<echo::concept::writable<decltype(x.data())>()>;
+  auto require(T&& x)
+      -> list<dimensionality<uncvref_t<decltype(x.dimensionality())>>()>;
 };
-}  // namespace concept
-}  // namespace detail
+}
 
 template <class T>
-constexpr bool writable_data() {
-  return models<detail::concept::WritableData, T>();
+constexpr bool dimensioned() {
+  return models<DETAIL_NS::Dimensioned, T>() || shaped<T>();
+}
+
+//////////////////
+// k_array_deep //
+//////////////////
+
+namespace DETAIL_NS {
+template <class T, class Shape, class Allocator>
+auto k_array_deep_impl(KArray<T, Shape, Allocator> && ) -> std::true_type;
+
+template <class T>
+auto k_array_deep_impl(T && ) -> std::false_type;
+}
+
+template <class T>
+constexpr bool k_array_deep() {
+  using Result =
+      decltype(DETAIL_NS::k_array_deep_impl(std::declval<T>()));
+  return Result::value;
+}
+
+//////////////////
+// k_array_view //
+//////////////////
+
+namespace DETAIL_NS {
+template <class Pointer, class Shape, class MemoryBackendTag>
+auto k_array_view_impl(KArrayView<Pointer, Shape, MemoryBackendTag> && )
+    -> std::true_type;
+
+template <class T>
+auto k_array_view_impl(T && ) -> std::false_type;
+}
+
+template <class T>
+constexpr bool k_array_view() {
+  using Result =
+      decltype(DETAIL_NS::k_array_view_impl(std::declval<T>()));
+  return Result::value;
 }
 
 /////////////
 // k_array //
 /////////////
 
-namespace detail {
-namespace concept {
-struct KArray : Concept {
-  template <class KArray>
-  auto require(KArray&& x)
-      -> list<echo::concept::contiguous_iterator<decltype(x.data())>(),
-              shape<uncvref_t<decltype(x.shape())>>()>;
-};
-}  // namespace concept
-}  // namespace detail
-
 template <class T>
 constexpr bool k_array() {
-  return models<detail::concept::KArray, T>();
+  return k_array_deep<T>() || k_array_view<T>();
 }
-
-namespace detail {
-namespace concept {
-template <int K>
-struct DimensionedKArray : Concept {
-  template <class KArray>
-  auto require(KArray&& x)
-      -> list<k_array<KArray>(), k_shape<K, uncvref_t<decltype(x.shape())>>()>;
-};
+}
 }
 }
 
-template <int K, class T>
-constexpr bool k_array() {
-  return models<detail::concept::DimensionedKArray<K>, T>();
-}
-
-////////////////////////
-// contiguous_k_array //
-////////////////////////
-
-namespace detail {
-namespace concept {
-struct ContiguousKArray : Concept {
-  template <class KArray>
-  auto require(KArray&& x) -> list<
-      k_array<KArray>(), contiguous_shape<uncvref_t<decltype(x.shape())>>()>;
-};
-}  // namespace concept
-}  // namespace detail
-
-template <class T>
-constexpr bool contiguous_k_array() {
-  return models<detail::concept::ContiguousKArray, T>();
-}
-
-template <int K, class T>
-constexpr bool contiguous_k_array() {
-  return contiguous_k_array<T>() && k_array<K, T>();
-}
-
-}  // namespace concept
-}  // namespace k_array
-}  // namespace echo
+#undef DETAIL_NS

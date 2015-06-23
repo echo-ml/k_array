@@ -1,75 +1,218 @@
 #pragma once
 
-#include <echo/index.h>
-#include <type_traits>
-#include <utility>
+#define DETAIL_NS detail_dimensionality
 
-namespace echo { namespace k_array {
+#include <echo/k_array/concept.h>
+#include <echo/k_array/extent.h>
+#include <echo/htl.h>
+#include <array>
 
-///////////////
-// Dimension //
-///////////////
+namespace echo {
+namespace k_array {
 
-struct Dimension {
-  static const IndexInteger kDynamic = -1;
-  using Dynamic = StaticIndex<kDynamic>;
+/////////////////
+// dimension_t //
+/////////////////
+
+namespace dimension_t {
+static constexpr index_t dynamic = -1;
+}
+
+////////////////////
+// Dimensionality //
+////////////////////
+
+namespace DETAIL_NS {
+struct extents_tag {};
+}
+
+template <class... Extents>
+class Dimensionality
+    : htl::Pack<DETAIL_NS::extents_tag, htl::Tuple<Extents...>> {
+  using Base =
+      htl::Pack<DETAIL_NS::extents_tag, htl::Tuple<Extents...>>;
+
+ public:
+  static constexpr int num_dimensions = sizeof...(Extents);
+  Dimensionality() : Base(htl::Tuple<Extents...>(Extents()...)) {}
+  explicit Dimensionality(Extents... extents)
+      : Base(htl::Tuple<Extents...>(extents...)) {}
+
+  template <int I, CONCEPT_REQUIRES(I >= 0 && I < sizeof...(Extents))>
+  auto extent() const {
+    return htl::get<I>(htl::unpack(*this));
+  }
+
+  decltype(auto) extents() const { return htl::unpack(*this); }
 };
 
-////////////
-// Stride //
-////////////
+/////////////////////////
+// make_dimensionality //
+/////////////////////////
 
-struct Stride {
-  static const IndexInteger kDynamic = -1;
-  using Dynamic = StaticIndex<kDynamic>;
-};
+namespace DETAIL_NS {
+template <std::size_t... Indexes, class Extent>
+auto make_dimensionality_impl(
+    std::index_sequence<Indexes...>,
+    const std::array<Extent, sizeof...(Indexes)>& extents) {
+  return Dimensionality<repeat_type_c<Indexes, index_t>...>(
+      std::get<Indexes>(extents)...);
+}
 
-///////////
-// Slice //
-///////////
+template <std::size_t... Indexes, class... Extents>
+auto make_dimensionality_impl(std::index_sequence<Indexes...>,
+                              const htl::Tuple<Extents...>& extents) {
+  return Dimensionality<decltype(make_extent(htl::get<Indexes>(extents)))...>(
+      make_extent(htl::get<Indexes>(extents))...);
+}
+}
 
-struct Slice {
-  static const IndexInteger kFull = -2;
-  using Full = StaticIndex<kFull>;
+template <std::size_t N, class Extent,
+          CONCEPT_REQUIRES(std::is_convertible<Extent, index_t>::value)>
+auto make_dimensionality(const std::array<Extent, N>& extents) {
+  return DETAIL_NS::make_dimensionality_impl(
+      std::make_index_sequence<N>(), extents);
+}
 
-  static const int kNull = -3;
-  using Null = StaticIndex<kNull>;
-};
+/////////////
+// ExtentC //
+/////////////
 
-namespace extent_traits {
+template <index_t I>
+using ExtentC =
+    std::conditional_t<I == dimension_t::dynamic, index_t, StaticIndex<I>>;
+
+/////////////////////
+// DimensionalityC //
+/////////////////////
+
+template <index_t... ExtentsC>
+using DimensionalityC = Dimensionality<ExtentC<ExtentsC>...>;
+
+/////////////////////////
+// make_dimensionality //
+/////////////////////////
+
+template <class... Extents,
+          CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
+auto make_dimensionality(Extents... extents) {
+  return Dimensionality<decltype(make_extent(extents))...>(
+      make_extent(extents)...);
+}
+
+template <class... Extents,
+          CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
+auto make_dimensionality(const htl::Tuple<Extents...>& extents) {
+  return DETAIL_NS::make_dimensionality_impl(
+      std::index_sequence_for<Extents...>(), extents);
+}
+
+////////////////
+// get_extent //
+////////////////
+
+template <int I, class... Extents,
+          CONCEPT_REQUIRES(I >= 0 && I < sizeof...(Extents))>
+auto get_extent(const Dimensionality<Extents...>& dimensionality) {
+  return dimensionality.template extent<I>();
+}
+
+//////////////////////
+// get_num_elements //
+//////////////////////
+
+template <class... Extents>
+auto get_num_elements(const Dimensionality<Extents...>& dimensionality) {
+  return htl::left_fold([](auto x, auto y) { return x * y; }, 1_index,
+                        dimensionality.extents());
+}
+
+////////////////
+// operator== //
+////////////////
+
+template <class... LhsExtents, class... RhsExtents>
+auto operator==(const Dimensionality<LhsExtents...>& lhs,
+                const Dimensionality<RhsExtents...>& rhs) {
+  return lhs.extents() == rhs.extents();
+}
+
+////////////////
+// operator!= //
+////////////////
+
+template <class... LhsExtents, class... RhsExtents>
+auto operator!=(const Dimensionality<LhsExtents...>& lhs,
+                const Dimensionality<RhsExtents...>& rhs) {
+  return lhs.extents() != rhs.extents();
+}
+}
+
+namespace dimensionality_traits {
+
+////////////////////
+// num_dimensions //
+////////////////////
+
+template <class Dimensionality>
+constexpr auto num_dimensions() -> decltype(Dimensionality::num_dimensions) {
+  return Dimensionality::num_dimensions;
+}
 
 /////////////////
 // extent_type //
 /////////////////
 
-template <index_t Extent>
-using extent_type = std::conditional_t<Extent == Dimension::kDynamic, index_t,
-                                       StaticIndex<Extent>>;
+template <int I, class Dimensionality>
+using extent_type =
+    decltype(k_array::get_extent<I>(std::declval<Dimensionality>()));
 
-/////////////////
-// extent_enum //
-/////////////////
+/////////////////////////
+// num_free_dimensions //
+/////////////////////////
 
-namespace detail { namespace dimensionality {
-template<index_t I>
-constexpr index_t extent_enum_impl(StaticIndex<I>) {
-  return I;
+namespace DETAIL_NS {
+template <class Dimensionality>
+auto num_free_dimensions_impl(Dimensionality dimensionality) {
+  auto is_free_dimension = [](auto x) {
+    return htl::integral_constant<
+        bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
+  };
+  return htl::count_if(is_free_dimension, dimensionality.extents());
+}
 }
 
-constexpr index_t extent_enum_impl(index_t) {
-  return Dimension::kDynamic;
+template <class Dimensionality,
+          CONCEPT_REQUIRES(k_array::concept::dimensionality<Dimensionality>())>
+constexpr int num_free_dimensions() {
+  using Result = decltype(DETAIL_NS::num_free_dimensions_impl(
+      std::declval<Dimensionality>()));
+  return Result::value;
 }
 
-}}
+////////////////////
+// free_dimension //
+////////////////////
 
-template<class Extent>
-constexpr auto extent_enum() -> 
-  decltype(detail::dimensionality::extent_enum_impl(std::declval<Extent>()))
-{
-  return detail::dimensionality::extent_enum_impl(Extent());
+namespace DETAIL_NS {
+template <class Dimensionality>
+auto free_dimension_impl(Dimensionality dimensionality) {
+  auto is_free_dimension = [](auto x) {
+    return htl::integral_constant<
+        bool, !std::is_same<decltype(x), StaticIndex<1>>::value>();
+  };
+  return htl::find_if(is_free_dimension, dimensionality.extents());
+}
 }
 
+template <class Dimensionality,
+          CONCEPT_REQUIRES(num_free_dimensions<Dimensionality>() == 1)>
+constexpr int free_dimension() {
+  using Result = decltype(DETAIL_NS::free_dimension_impl(
+      std::declval<Dimensionality>()));
+  return Result::value;
+}
+}
 }
 
-}  // namespace k_array
-}  // namespace echo
+#undef DETAIL_NS

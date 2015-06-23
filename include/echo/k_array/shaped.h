@@ -1,7 +1,7 @@
 #pragma once
 
-#include <echo/k_array2/concept.h>
-#include <echo/k_array2/dimensioned.h>
+#include <echo/k_array/concept.h>
+#include <echo/k_array/dimensioned.h>
 
 namespace echo {
 namespace k_array {

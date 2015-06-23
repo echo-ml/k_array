@@ -1,7 +1,7 @@
-#include <echo/k_array2/dimensionality.h>
-#include <echo/k_array2/shape.h>
-#include <echo/k_array2/slice.h>
-#include <echo/k_array2/make_subshape.h>
+#include <echo/k_array/dimensionality.h>
+#include <echo/k_array/shape.h>
+#include <echo/k_array/slice.h>
+#include <echo/k_array/make_subshape.h>
 #include <echo/test.h>
 
 using namespace echo;

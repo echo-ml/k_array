@@ -1,9 +1,9 @@
-#include <echo/k_array2/dimensionality.h>
-#include <echo/k_array2/shape.h>
-#include <echo/k_array2/subshape.h>
-#include <echo/k_array2/k_array.h>
-#include <echo/k_array2/k_array_view.h>
-#include <echo/k_array2/shaped.h>
+#include <echo/k_array/dimensionality.h>
+#include <echo/k_array/shape.h>
+#include <echo/k_array/subshape.h>
+#include <echo/k_array/k_array.h>
+#include <echo/k_array/k_array_view.h>
+#include <echo/k_array/shaped.h>
 #include <echo/test.h>
 
 using namespace echo;
@@ -42,7 +42,7 @@ TEST_CASE("concept2") {
   CHECK(!k_array::concept::contiguous_shape<decltype(s2)>());
 }
 
-TEST_CASE("k_array2") {
+TEST_CASE("k_array") {
   KArray<double, ShapeC<2, 3>> a1;
   a1 = {{1, 2, 3}, {4, 5, 6}};
   CHECK(a1(0, 0) == 1);
