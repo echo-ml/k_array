@@ -1,5 +1,7 @@
 #pragma once
 
+#define DETAIL_NS detail_slice
+
 #include <echo/k_array/concept.h>
 
 namespace echo {
@@ -66,19 +68,17 @@ auto counted_range(index_t a, Extent extent) {
 }
 
 namespace concept {
-namespace detail {
-namespace slice {
+namespace DETAIL_NS {
 template <class Extent>
 auto counted_range_impl(CountedRange<Extent> && ) -> std::true_type;
 
 template <class T>
 auto counted_range_impl(T && ) -> std::false_type;
 }
-}
 
 template <class T>
 constexpr bool counted_range() {
-  using Result = decltype(detail::slice::counted_range_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::counted_range_impl(std::declval<T>()));
   return Result::value;
 }
 }
@@ -101,9 +101,7 @@ constexpr bool slice() {
 // proper_slices //
 ///////////////////
 
-namespace detail {
-namespace slice {
-
+namespace DETAIL_NS {
 template <class... Slices>
 auto proper_slices_impl(Slices...) {
   return std::integral_constant<
@@ -115,14 +113,15 @@ auto proper_slices_impl(k_array::slice::all_t, SlicesRest... slices_rest) {
   return proper_slices_impl(slices_rest...);
 }
 }
-}
 
 template <class... Slices>
 constexpr bool proper_slices() {
   using Result =
-      decltype(detail::slice::proper_slices_impl(std::declval<Slices>()...));
+      decltype(DETAIL_NS::proper_slices_impl(std::declval<Slices>()...));
   return Result::value;
 }
 }
 }
 }
+
+#undef DETAIL_NS

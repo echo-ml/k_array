@@ -1,5 +1,7 @@
 #pragma once
 
+#define DETAIL_NS detail_make_subshape
+
 #include <echo/k_array/slice.h>
 #include <echo/k_array/shape_traits.h>
 
@@ -10,9 +12,7 @@ namespace k_array {
 // get_subdimensions //
 ///////////////////////
 
-namespace detail {
-namespace make_subshape {
-
+namespace DETAIL_NS {
 struct empty_dimension {};
 
 template <class Extent, CONCEPT_REQUIRES(concept::static_extent<Extent>())>
@@ -52,16 +52,13 @@ index_t get_subdimension(
 template <class Shape, class Slices>
 auto get_subdimensions(const Shape& shape, const Slices& make_subshapes) {
   auto subdimensions = htl::map([](auto extent, auto make_subshape) {
-    return k_array::detail::make_subshape::get_subdimension(extent,
-                                                            make_subshape);
+    return k_array::DETAIL_NS::get_subdimension(extent, make_subshape);
   }, shape.extents(), make_subshapes);
   return make_dimensionality(htl::remove_if([](auto dimension) {
     return htl::integral_constant<
-        bool,
-        std::is_same<decltype(dimension),
-                     k_array::detail::make_subshape::empty_dimension>::value>();
+        bool, std::is_same<decltype(dimension),
+                           k_array::DETAIL_NS::empty_dimension>::value>();
   }, subdimensions));
-}
 }
 }
 
@@ -69,9 +66,7 @@ auto get_subdimensions(const Shape& shape, const Slices& make_subshapes) {
 // SubdimensionIndexes //
 /////////////////////////
 
-namespace detail {
-namespace make_subshape {
-
+namespace DETAIL_NS {
 template <class... Slices>
 auto get_subdimension_indexes_impl(const htl::Tuple<Slices...>& slices) {
   auto indexes = htl::make_index_sequence<sizeof...(Slices)>();
@@ -87,15 +82,12 @@ template <class Slices>
 using SubdimensionIndexes =
     decltype(get_subdimension_indexes_impl(std::declval<Slices>()));
 }
-}
 
 /////////////////
 // get_strides //
 /////////////////
 
-namespace detail {
-namespace make_subshape {
-
+namespace DETAIL_NS {
 template <std::size_t I, std::size_t J, class StrideI, class Shape>
 auto get_stride(StrideI stride_i, const Shape& shape) {
   decltype(auto) extents_make_subshape = htl::slice<I, J>(shape.extents());
@@ -134,7 +126,6 @@ auto get_strides(const Shape& shape, const Slices& slices) {
   return get_strides_impl(SubdimensionIndexes<Slices>(), shape);
 }
 }
-}
 
 ///////////////////
 // make_subshape //
@@ -148,9 +139,8 @@ template <class Shape, class... Slices,
                            !concept::proper_slices<Slices...>())>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
   auto slices_tuple = htl::make_tuple(slices...);
-  return make_subshape(
-      detail::make_subshape::get_subdimensions(shape, slices_tuple),
-      detail::make_subshape::get_strides(shape, slices_tuple));
+  return make_subshape(DETAIL_NS::get_subdimensions(shape, slices_tuple),
+                       DETAIL_NS::get_strides(shape, slices_tuple));
 }
 
 template <class Shape, class... Slices,
@@ -161,7 +151,7 @@ template <class Shape, class... Slices,
                            concept::proper_slices<Slices...>())>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
   using SubdimensionIndexes =
-      detail::make_subshape::SubdimensionIndexes<htl::Tuple<Slices...>>;
+      DETAIL_NS::SubdimensionIndexes<htl::Tuple<Slices...>>;
   return make_shape(
       htl::left<htl::tuple_traits::num_elements<SubdimensionIndexes>()>(
           shape.extents()));
@@ -174,11 +164,13 @@ template <class Shape, class... Slices,
                                sizeof...(Slices))>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
   using SubdimensionIndexes =
-      detail::make_subshape::SubdimensionIndexes<htl::Tuple<Slices...>>;
+      DETAIL_NS::SubdimensionIndexes<htl::Tuple<Slices...>>;
   auto slices_tuple = htl::make_tuple(slices...);
   return make_subshape(
-      detail::make_subshape::get_subdimensions(shape, slices_tuple),
+      DETAIL_NS::get_subdimensions(shape, slices_tuple),
       htl::make_subtuple(SubdimensionIndexes(), shape.strides()));
 }
 }
 }
+
+#undef DETAIL_NS

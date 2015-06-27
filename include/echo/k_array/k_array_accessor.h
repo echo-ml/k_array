@@ -1,5 +1,7 @@
 #pragma once
 
+#define DETAIL_NS detail_k_array_accessor
+
 #include <echo/k_array/shape_traits.h>
 #include <echo/repeat_type.h>
 #include <echo/access_mode.h>
@@ -12,9 +14,7 @@ namespace k_array {
 // KArrayConstAccessor //
 /////////////////////////
 
-namespace detail {
-namespace k_array_accessor {
-
+namespace DETAIL_NS {
 template <class Indexes, class Derived, class Shape>
 struct KArrayConstAccessorImpl {};
 
@@ -32,11 +32,10 @@ struct KArrayConstAccessorImpl<std::index_sequence<Indexes...>, Derived,
   }
 };
 }
-}
 
 template <class Derived, class Shape>
 struct KArrayConstAccessor
-    : detail::k_array_accessor::KArrayConstAccessorImpl<
+    : DETAIL_NS::KArrayConstAccessorImpl<
           std::make_index_sequence<shape_traits::num_dimensions<Shape>()>,
           Derived, Shape> {};
 
@@ -44,9 +43,7 @@ struct KArrayConstAccessor
 // KArrayAccessor //
 ////////////////////
 
-namespace detail {
-namespace k_array_accessor {
-
+namespace DETAIL_NS {
 template <class Indexes, class Derived, class Shape>
 struct KArrayAccessorImpl {};
 
@@ -68,13 +65,14 @@ struct KArrayAccessorImpl<std::index_sequence<Indexes...>, Derived, Shape>
   }
 };
 }
-}
 
 template <class Derived, class Shape>
 struct KArrayAccessor
-    : detail::k_array_accessor::KArrayAccessorImpl<
+    : DETAIL_NS::KArrayAccessorImpl<
           std::make_index_sequence<shape_traits::num_dimensions<Shape>()>,
           Derived, Shape> {};
 
 }  // namespace k_array
 }  // namespace echo
+
+#undef DETAIL_NS

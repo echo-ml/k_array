@@ -1,5 +1,7 @@
 #pragma once
 
+#define DETAIL_NS detail_subshape
+
 #include <echo/k_array/concept.h>
 #include <echo/k_array/extent.h>
 
@@ -10,16 +12,14 @@ namespace k_array {
 // Subshape //
 //////////////
 
-namespace detail {
-namespace subshape {
+namespace DETAIL_NS {
 struct strides_tag {};
-}
 }
 
 template <class Dimensionality, class Strides>
 class Subshape : public Dimensionality,
-                 htl::Pack<detail::subshape::strides_tag, Strides> {
-  using StridesBase = htl::Pack<detail::subshape::strides_tag, Strides>;
+                 htl::Pack<DETAIL_NS::strides_tag, Strides> {
+  using StridesBase = htl::Pack<DETAIL_NS::strides_tag, Strides>;
 
  public:
   Subshape() {}
@@ -27,7 +27,7 @@ class Subshape : public Dimensionality,
       : Dimensionality(dimensionality), StridesBase(strides) {}
 
   const auto& strides() const {
-    return htl::unpack<detail::subshape::strides_tag>(*this);
+    return htl::unpack<DETAIL_NS::strides_tag>(*this);
   }
 };
 
@@ -66,9 +66,7 @@ auto get_stride(const Subshape<Dimensionality, Strides>& subshape) {
 // get_1d_index //
 //////////////////
 
-namespace detail {
-namespace subshape {
-
+namespace DETAIL_NS {
 template <class Stride>
 index_t get_1d_index_impl(const htl::Tuple<Stride>& strides, index_t index) {
   return htl::head(strides) * index;
@@ -82,7 +80,6 @@ index_t get_1d_index_impl(
          get_1d_index_impl(htl::tail(strides), indexes_rest...);
 }
 }
-}
 
 template <
     class... Extents, class Strides, class... Indexes,
@@ -91,7 +88,9 @@ template <
 index_t get_1d_index(
     const Subshape<Dimensionality<Extents...>, Strides>& subshape,
     Indexes... indexes) {
-  return detail::subshape::get_1d_index_impl(subshape.strides(), indexes...);
+  return DETAIL_NS::get_1d_index_impl(subshape.strides(), indexes...);
 }
 }
 }
+
+#undef DETAIL_NS

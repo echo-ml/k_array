@@ -1,5 +1,7 @@
 #pragma once
 
+#define DETAIL_NS detail_shape
+
 #include <echo/k_array/dimensionality.h>
 #include <echo/k_array/concept.h>
 #include <echo/htl.h>
@@ -70,9 +72,7 @@ auto get_stride(const Shape<Extents...>& shape) {
 // get_1d_index //
 //////////////////
 
-namespace detail {
-namespace shape {
-
+namespace DETAIL_NS {
 template <class Extent>
 index_t get_1d_index_impl(const htl::Tuple<Extent>&, index_t index) {
   return index;
@@ -87,14 +87,15 @@ index_t get_1d_index_impl(
              get_1d_index_impl(htl::tail(extents), indexes_rest...);
 }
 }
-}
 
 template <
     class... Extents, class... Indexes,
     CONCEPT_REQUIRES(sizeof...(Extents) == sizeof...(Indexes) &&
                      and_c<std::is_convertible<Indexes, index_t>::value...>())>
 index_t get_1d_index(const Shape<Extents...>& shape, Indexes... indexes) {
-  return detail::shape::get_1d_index_impl(shape.extents(), indexes...);
+  return DETAIL_NS::get_1d_index_impl(shape.extents(), indexes...);
 }
 }
 }
+
+#undef DETAIL_NS
