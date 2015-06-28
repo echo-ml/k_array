@@ -4,6 +4,8 @@
 #include <echo/k_array/dimensionality.h>
 #include <echo/k_array/shape.h>
 #include <echo/k_array/subshape.h>
+#include <echo/k_array/shaped.h>
+#include <echo/k_array/dimensioned.h>
 #include <echo/k_array/k_array.h>
 #include <echo/k_array/k_array_view.h>
 

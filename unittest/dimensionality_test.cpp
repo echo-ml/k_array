@@ -93,6 +93,9 @@ TEST_CASE("num_free_dimensions2") {
   CHECK(dimensionality_traits::num_free_dimensions<decltype(d1)>() == 2);
   CHECK(dimensionality_traits::num_free_dimensions<decltype(d2)>() == 1);
   CHECK(dimensionality_traits::num_free_dimensions<decltype(d3)>() == 0);
+
+  ShapeC<3, dimension_t::dynamic> s1;
+  CHECK(shape_traits::num_free_dimensions<decltype(s1)>() == 2);
 }
 
 TEST_CASE("free_dimension2") {

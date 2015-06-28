@@ -1,5 +1,6 @@
 #pragma once
 
+#include <echo/k_array/shape_traits.h>
 #include <echo/k_array/concept.h>
 #include <echo/k_array/dimensioned.h>
 
