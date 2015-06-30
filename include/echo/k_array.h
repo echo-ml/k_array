@@ -14,6 +14,10 @@ namespace echo {
 using echo::k_array::make_dimensionality;
 using echo::k_array::make_shape;
 using echo::k_array::make_subshape;
+using echo::k_array::make_strides;
+using echo::k_array::get_dimensionality;
+using echo::k_array::get_num_elements;
+using echo::k_array::get_extent;
 using echo::k_array::Dimensionality;
 using echo::k_array::DimensionalityC;
 using echo::k_array::Shape;

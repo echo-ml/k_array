@@ -29,6 +29,10 @@ class Subshape : public Dimensionality,
   const auto& strides() const {
     return htl::unpack<DETAIL_NS::strides_tag>(*this);
   }
+
+  const auto& dimensionality() const {
+    return static_cast<const Dimensionality&>(*this);
+  }
 };
 
 //////////////////
@@ -82,13 +86,23 @@ index_t get_1d_index_impl(
 }
 
 template <
+    class... Strides, class... Indexes,
+    CONCEPT_REQUIRES(sizeof...(Strides) == sizeof...(Indexes) &&
+                     and_c<concept::extent<Strides>()...>() &&
+                     and_c<std::is_convertible<Indexes, index_t>::value...>())>
+index_t get_1d_index(const htl::Tuple<Strides...>& strides,
+                     Indexes... indexes) {
+  return DETAIL_NS::get_1d_index_impl(strides, indexes...);
+}
+
+template <
     class... Extents, class Strides, class... Indexes,
     CONCEPT_REQUIRES(sizeof...(Extents) == sizeof...(Indexes) &&
                      and_c<std::is_convertible<Indexes, index_t>::value...>())>
 index_t get_1d_index(
     const Subshape<Dimensionality<Extents...>, Strides>& subshape,
     Indexes... indexes) {
-  return DETAIL_NS::get_1d_index_impl(subshape.strides(), indexes...);
+  return get_1d_index(subshape.strides(), indexes...);
 }
 }
 }

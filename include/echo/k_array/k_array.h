@@ -66,7 +66,7 @@ class KArray : htl::Pack<Shape>,
   KArray& operator=(KArray&& other) noexcept {
     if (this == std::addressof(other)) return *this;
     release();
-    static_cast<Shape&>(*this) = other.shape();
+    modifiable_shape() = other.shape();
     _data = other._data;
     other._data = nullptr;
     return *this;
@@ -79,7 +79,7 @@ class KArray : htl::Pack<Shape>,
   }
 
   void swap(KArray& other) noexcept {
-    std::swap(static_cast<Shape&>(*this), static_cast<Shape&>(other));
+    std::swap(this->modifiable_shape(), other.modifiable_shape());
     std::swap(_data, other._data);
   }
 
@@ -91,17 +91,16 @@ class KArray : htl::Pack<Shape>,
 
   const Shape& shape() const { return htl::unpack<Shape>(*this); }
 
-  Shape& shape() { return htl::unpack<Shape>(*this); }
-
   const Allocator& allocator() const { return htl::unpack<Allocator>(*this); }
   Allocator& allocator() { return htl::unpack<Allocator>(*this); }
 
  private:
+  Shape& modifiable_shape() { return htl::unpack<Shape>(*this); }
   template <class OtherT, class OtherAllocator,
             CONCEPT_REQUIRES(std::is_convertible<OtherT, T>::value)>
   void copy_construct(const KArray<OtherT, Shape, OtherAllocator>& other) {
     auto other_num_elements = get_num_elements(other);
-    shape() = other.shape();
+    modifiable_shape() = other.shape();
     _data = this->allocator().allocate(other_num_elements);
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
          other.data(), std::next(other.data(), other_num_elements),
@@ -117,9 +116,9 @@ class KArray : htl::Pack<Shape>,
     // TODO: allow for reallocation
     if (this_num_elements != other_num_elements) {
       release();
-      _data = this->allocate(other_num_elements);
+      _data = this->allocator().allocate(other_num_elements);
     }
-    static_cast<Shape&>(*this) = other.shape();
+    modifiable_shape() = other.shape();
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
          other.data(), std::next(other.data(), other_num_elements),
          memory_backend_traits::memory_backend_tag<Allocator>(), _data);
