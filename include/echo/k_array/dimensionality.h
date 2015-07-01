@@ -10,18 +10,16 @@
 namespace echo {
 namespace k_array {
 
-/////////////////
-// dimension_t //
-/////////////////
-
+//------------------------------------------------------------------------------
+// dimension_t
+//------------------------------------------------------------------------------
 namespace dimension_t {
 static constexpr index_t dynamic = -1;
 }
 
-////////////////////
-// Dimensionality //
-////////////////////
-
+//------------------------------------------------------------------------------
+// Dimensionality
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct extents_tag {};
 }
@@ -46,10 +44,9 @@ class Dimensionality
   decltype(auto) extents() const { return htl::unpack(*this); }
 };
 
-/////////////////////////
-// make_dimensionality //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// make_dimensionality
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <std::size_t... Indexes, class Extent>
 auto make_dimensionality_impl(
@@ -74,25 +71,22 @@ auto make_dimensionality(const std::array<Extent, N>& extents) {
       std::make_index_sequence<N>(), extents);
 }
 
-/////////////
-// ExtentC //
-/////////////
-
+//------------------------------------------------------------------------------
+// ExtentC
+//------------------------------------------------------------------------------
 template <index_t I>
 using ExtentC =
     std::conditional_t<I == dimension_t::dynamic, index_t, StaticIndex<I>>;
 
-/////////////////////
-// DimensionalityC //
-/////////////////////
-
+//------------------------------------------------------------------------------
+// DimensionalityC
+//------------------------------------------------------------------------------
 template <index_t... ExtentsC>
 using DimensionalityC = Dimensionality<ExtentC<ExtentsC>...>;
 
-/////////////////////////
-// make_dimensionality //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// make_dimensionality
+//------------------------------------------------------------------------------
 template <class... Extents,
           CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_dimensionality(Extents... extents) {
@@ -107,40 +101,36 @@ auto make_dimensionality(const htl::Tuple<Extents...>& extents) {
       std::index_sequence_for<Extents...>(), extents);
 }
 
-////////////////
-// get_extent //
-////////////////
-
+//------------------------------------------------------------------------------
+// get_extent
+//------------------------------------------------------------------------------
 template <int I, class... Extents,
           CONCEPT_REQUIRES(I >= 0 && I < sizeof...(Extents))>
 auto get_extent(const Dimensionality<Extents...>& dimensionality) {
   return dimensionality.template extent<I>();
 }
 
-//////////////////////
-// get_num_elements //
-//////////////////////
-
+//------------------------------------------------------------------------------
+// get_num_elements
+//------------------------------------------------------------------------------
 template <class... Extents>
 auto get_num_elements(const Dimensionality<Extents...>& dimensionality) {
   return htl::left_fold([](auto x, auto y) { return x * y; }, 1_index,
                         dimensionality.extents());
 }
 
-////////////////
-// operator== //
-////////////////
-
+//------------------------------------------------------------------------------
+// operator==
+//------------------------------------------------------------------------------
 template <class... LhsExtents, class... RhsExtents>
 auto operator==(const Dimensionality<LhsExtents...>& lhs,
                 const Dimensionality<RhsExtents...>& rhs) {
   return lhs.extents() == rhs.extents();
 }
 
-////////////////
-// operator!= //
-////////////////
-
+//------------------------------------------------------------------------------
+// operator!=
+//------------------------------------------------------------------------------
 template <class... LhsExtents, class... RhsExtents>
 auto operator!=(const Dimensionality<LhsExtents...>& lhs,
                 const Dimensionality<RhsExtents...>& rhs) {
@@ -150,27 +140,24 @@ auto operator!=(const Dimensionality<LhsExtents...>& lhs,
 
 namespace dimensionality_traits {
 
-////////////////////
-// num_dimensions //
-////////////////////
-
+//------------------------------------------------------------------------------
+// num_dimensions
+//------------------------------------------------------------------------------
 template <class Dimensionality>
 constexpr auto num_dimensions() -> decltype(Dimensionality::num_dimensions) {
   return Dimensionality::num_dimensions;
 }
 
-/////////////////
-// extent_type //
-/////////////////
-
+//------------------------------------------------------------------------------
+// extent_type
+//------------------------------------------------------------------------------
 template <int I, class Dimensionality>
 using extent_type =
     decltype(k_array::get_extent<I>(std::declval<Dimensionality>()));
 
-/////////////////////////
-// num_free_dimensions //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// num_free_dimensions
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Dimensionality>
 auto num_free_dimensions_impl(Dimensionality dimensionality) {
@@ -190,10 +177,9 @@ constexpr int num_free_dimensions() {
   return Result::value;
 }
 
-////////////////////
-// free_dimension //
-////////////////////
-
+//------------------------------------------------------------------------------
+// free_dimension
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Dimensionality>
 auto free_dimension_impl(Dimensionality dimensionality) {

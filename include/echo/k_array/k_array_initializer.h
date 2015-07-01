@@ -8,18 +8,16 @@
 namespace echo {
 namespace k_array {
 
-/////////////////////////
-// InitializationError //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// InitializationError
+//------------------------------------------------------------------------------
 struct InitializationError : virtual std::runtime_error {
   InitializationError() : std::runtime_error("InitializationError") {}
 };
 
-///////////////////////
-// KArrayInitializer //
-///////////////////////
-
+//------------------------------------------------------------------------------
+// KArrayInitializer
+//------------------------------------------------------------------------------
 template <class Derived, class Scalar, class Shape>
 struct KArrayInitializer {
   void initialize(InitializerMultilist<
@@ -33,10 +31,9 @@ struct KArrayInitializer {
   }
 };
 
-////////////////////////////
-// KArrayConstInitializer //
-////////////////////////////
-
+//------------------------------------------------------------------------------
+// KArrayConstInitializer
+//------------------------------------------------------------------------------
 template <class Derived, class Scalar, class Shape>
 struct KArrayConstInitializer : KArrayInitializer<Derived, Scalar, Shape> {
   using KArrayInitializer<Derived, Scalar, Shape>::initialize;

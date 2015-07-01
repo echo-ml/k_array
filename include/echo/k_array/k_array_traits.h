@@ -6,12 +6,21 @@
 namespace echo {
 namespace k_array_traits {
 
+//------------------------------------------------------------------------------
+// pointer
+//------------------------------------------------------------------------------
 template <class KArray>
 using pointer = decltype(std::declval<KArray>().data());
 
+//------------------------------------------------------------------------------
+// const_pointer
+//------------------------------------------------------------------------------
 template <class KArray>
 using const_pointer = decltype(std::declval<KArray>().const_data());
 
+//------------------------------------------------------------------------------
+// value_type
+//------------------------------------------------------------------------------
 template <class KArray>
 using value_type = iterator_traits::value_type<pointer<KArray>>;
 }

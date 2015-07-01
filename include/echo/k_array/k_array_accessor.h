@@ -10,10 +10,9 @@
 namespace echo {
 namespace k_array {
 
-/////////////////////////
-// KArrayConstAccessor //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// KArrayConstAccessor
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Indexes, class Derived, class Shape>
 struct KArrayConstAccessorImpl {};
@@ -39,10 +38,9 @@ struct KArrayConstAccessor
           std::make_index_sequence<shape_traits::num_dimensions<Shape>()>,
           Derived, Shape> {};
 
-////////////////////
-// KArrayAccessor //
-////////////////////
-
+//------------------------------------------------------------------------------
+// KArrayAccessor
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Indexes, class Derived, class Shape>
 struct KArrayAccessorImpl {};

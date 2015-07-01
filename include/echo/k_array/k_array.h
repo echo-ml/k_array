@@ -15,6 +15,9 @@
 namespace echo {
 namespace k_array {
 
+//------------------------------------------------------------------------------
+// KArray
+//------------------------------------------------------------------------------
 template <class T, class Shape, class Allocator>
 class KArray : htl::Pack<Shape>,
                htl::Pack<Allocator>,

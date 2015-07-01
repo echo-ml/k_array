@@ -8,10 +8,9 @@
 namespace echo {
 namespace k_array {
 
-//////////////
-// Subshape //
-//////////////
-
+//------------------------------------------------------------------------------
+// Subshape
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct strides_tag {};
 }
@@ -35,20 +34,18 @@ class Subshape : public Dimensionality,
   }
 };
 
-//////////////////
-// make_strides //
-//////////////////
-
+//------------------------------------------------------------------------------
+// make_strides
+//------------------------------------------------------------------------------
 template <class... Strides,
           CONCEPT_REQUIRES(and_c<concept::extent<Strides>()...>())>
 auto make_strides(Strides... strides) {
   return htl::Tuple<decltype(make_extent(strides))...>(make_extent(strides)...);
 }
 
-///////////////////
-// make_subshape //
-///////////////////
-
+//------------------------------------------------------------------------------
+// make_subshape
+//------------------------------------------------------------------------------
 template <class Dimensionality, class Strides,
           CONCEPT_REQUIRES(concept::dimensionality<Dimensionality>() &&
                            concept::index_tuple<Strides>())>
@@ -57,19 +54,17 @@ auto make_subshape(const Dimensionality& dimensionality,
   return Subshape<Dimensionality, Strides>(dimensionality, strides);
 }
 
-////////////////
-// get_stride //
-////////////////
-
+//------------------------------------------------------------------------------
+// get_stride
+//------------------------------------------------------------------------------
 template <int I, class Dimensionality, class Strides>
 auto get_stride(const Subshape<Dimensionality, Strides>& subshape) {
   return htl::get<I>(subshape.strides());
 }
 
-//////////////////
-// get_1d_index //
-//////////////////
-
+//------------------------------------------------------------------------------
+// get_1d_index
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Stride>
 index_t get_1d_index_impl(const htl::Tuple<Stride>& strides, index_t index) {

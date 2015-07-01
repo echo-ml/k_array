@@ -22,10 +22,9 @@ class Subshape;
 
 namespace concept {
 
-////////////
-// extent //
-////////////
-
+//------------------------------------------------------------------------------
+// extent
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <index_t I>
 auto extent_impl(StaticIndex<I>) -> std::true_type;
@@ -41,10 +40,9 @@ constexpr bool extent() {
   return Result::value;
 }
 
-///////////////////
-// static_extent //
-///////////////////
-
+//------------------------------------------------------------------------------
+// static_extent
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <index_t I>
 auto static_extent_impl(StaticIndex<I> && ) -> std::true_type;
@@ -60,19 +58,17 @@ constexpr bool static_extent() {
   return Result::value;
 }
 
-////////////////////
-// dynamic_extent //
-////////////////////
-
+//------------------------------------------------------------------------------
+// dynamic_extent
+//------------------------------------------------------------------------------
 template <class T>
 constexpr bool dynamic_extent() {
   return !static_extent<T>() && extent<T>();
 }
 
-/////////////////
-// index_tuple //
-/////////////////
-
+//------------------------------------------------------------------------------
+// index_tuple
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
 auto index_tuple_impl(htl::Tuple<Extents...> && ) -> std::true_type;
@@ -87,10 +83,9 @@ constexpr bool index_tuple() {
   return Result::value;
 }
 
-////////////////////
-// dimensionality //
-////////////////////
-
+//------------------------------------------------------------------------------
+// dimensionality
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
 auto dimensionality_impl(Dimensionality<Extents...> && ) -> std::true_type;
@@ -120,10 +115,9 @@ constexpr bool static_dimensionality() {
   return Result::value;
 }
 
-//////////////////////
-// contiguous_shape //
-//////////////////////
-
+//------------------------------------------------------------------------------
+// contiguous_shape
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class... Extents>
 auto contiguous_shape_impl(Shape<Extents...> && ) -> std::true_type;
@@ -139,10 +133,9 @@ constexpr bool contiguous_shape() {
   return Result::value;
 }
 
-//////////////
-// subshape //
-//////////////
-
+//------------------------------------------------------------------------------
+// subshape
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Dimensionality, class Strides>
 auto subshape_impl(Subshape<Dimensionality, Strides> && ) -> std::true_type;
@@ -157,19 +150,17 @@ constexpr bool subshape() {
   return Result::value;
 }
 
-///////////
-// shape //
-///////////
-
+//------------------------------------------------------------------------------
+// shape
+//------------------------------------------------------------------------------
 template <class T>
 constexpr bool shape() {
   return contiguous_shape<T>() || subshape<T>();
 }
 
-//////////////////
-// static_shape //
-//////////////////
-
+//------------------------------------------------------------------------------
+// static_shape
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct StaticShape : Concept {
   template <class T>
@@ -184,10 +175,9 @@ constexpr bool static_shape() {
   return models<DETAIL_NS::StaticShape, T>();
 }
 
-////////////
-// shaped //
-////////////
-
+//------------------------------------------------------------------------------
+// shaped
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct Shaped : Concept {
   template <class T>
@@ -200,10 +190,9 @@ constexpr bool shaped() {
   return models<DETAIL_NS::Shaped, T>();
 }
 
-/////////////////
-// dimensioned //
-/////////////////
-
+//------------------------------------------------------------------------------
+// dimensioned
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct Dimensioned : Concept {
   template <class T>
@@ -217,10 +206,9 @@ constexpr bool dimensioned() {
   return models<DETAIL_NS::Dimensioned, T>() || shaped<T>();
 }
 
-//////////////////
-// k_array_deep //
-//////////////////
-
+//------------------------------------------------------------------------------
+// k_array_deep
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class T, class Shape, class Allocator>
 auto k_array_deep_impl(KArray<T, Shape, Allocator> && ) -> std::true_type;
@@ -236,10 +224,9 @@ constexpr bool k_array_deep() {
   return Result::value;
 }
 
-//////////////////
-// k_array_view //
-//////////////////
-
+//------------------------------------------------------------------------------
+// k_array_view
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Pointer, class Shape, class MemoryBackendTag>
 auto k_array_view_impl(KArrayView<Pointer, Shape, MemoryBackendTag> && )
@@ -256,10 +243,9 @@ constexpr bool k_array_view() {
   return Result::value;
 }
 
-/////////////
-// k_array //
-/////////////
-
+//------------------------------------------------------------------------------
+// k_array
+//------------------------------------------------------------------------------
 template <class T>
 constexpr bool k_array() {
   return k_array_deep<T>() || k_array_view<T>();

@@ -10,6 +10,9 @@
 namespace echo {
 namespace k_array {
 
+//------------------------------------------------------------------------------
+// KArrayView
+//------------------------------------------------------------------------------
 template <class Pointer, class Shape, class MemoryBackendTag>
 class KArrayView
     : htl::Pack<Shape>,
@@ -53,10 +56,9 @@ class KArrayView
   pointer _data;
 };
 
-///////////////////////
-// make_k_array_view //
-///////////////////////
-
+//------------------------------------------------------------------------------
+// make_k_array_view
+//------------------------------------------------------------------------------
 template <class Pointer, class Shape,
           CONCEPT_REQUIRES(echo::concept::contiguous_iterator<Pointer>() &&
                            concept::shape<Shape>())>
@@ -71,20 +73,18 @@ auto make_k_array_view(Pointer data, const Shape& shape) {
   return KArrayView<Pointer, Shape, MemoryBackendTag>(data, shape);
 }
 
-///////////////
-// make_view //
-///////////////
-
+//------------------------------------------------------------------------------
+// make_view
+//------------------------------------------------------------------------------
 template <class KArray, CONCEPT_REQUIRES(concept::k_array<uncvref_t<KArray>>())>
 auto make_view(KArray&& k_array) {
   return make_k_array_view<typename uncvref_t<KArray>::memory_backend_tag>(
       k_array.data(), k_array.shape());
 }
 
-////////////////
-// make_cview //
-////////////////
-
+//------------------------------------------------------------------------------
+// make_cview
+//------------------------------------------------------------------------------
 template <class KArray, CONCEPT_REQUIRES(concept::k_array<uncvref_t<KArray>>())>
 auto make_cview(KArray&& k_array) {
   return make_k_array_view<typename uncvref_t<KArray>::memory_backend_tag>(

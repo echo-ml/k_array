@@ -9,10 +9,9 @@
 namespace echo {
 namespace k_array {
 
-///////////
-// Shape //
-///////////
-
+//------------------------------------------------------------------------------
+// Shape
+//------------------------------------------------------------------------------
 template <class... Extents>
 class Shape : public Dimensionality<Extents...> {
   using Base = Dimensionality<Extents...>;
@@ -26,17 +25,15 @@ class Shape : public Dimensionality<Extents...> {
   const auto& dimensionality() const { return static_cast<const Base&>(*this); }
 };
 
-////////////
-// ShapeC //
-////////////
-
+//------------------------------------------------------------------------------
+// ShapeC
+//------------------------------------------------------------------------------
 template <index_t... ExtentsC>
 using ShapeC = Shape<ExtentC<ExtentsC>...>;
 
-////////////////
-// make_shape //
-////////////////
-
+//------------------------------------------------------------------------------
+// make_shape
+//------------------------------------------------------------------------------
 template <class... Extents>
 auto make_shape(const Dimensionality<Extents...>& dimensionality) {
   return Shape<Extents...>(dimensionality);
@@ -54,10 +51,9 @@ auto make_shape(const htl::Tuple<Extents...>& extents) {
   return reinterpret_cast<const Shape<Extents...>&>(extents);
 }
 
-////////////////
-// get_stride //
-////////////////
-
+//------------------------------------------------------------------------------
+// get_stride
+//------------------------------------------------------------------------------
 template <int I, class... Extents,
           CONCEPT_REQUIRES(I >= 0 && I < sizeof...(Extents))>
 auto get_stride(const Shape<Extents...>& shape) {
@@ -68,10 +64,9 @@ auto get_stride(const Shape<Extents...>& shape) {
                         extents_);
 }
 
-//////////////////
-// get_1d_index //
-//////////////////
-
+//------------------------------------------------------------------------------
+// get_1d_index
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class Extent>
 index_t get_1d_index_impl(const htl::Tuple<Extent>&, index_t index) {

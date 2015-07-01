@@ -8,10 +8,9 @@
 namespace echo {
 namespace k_array {
 
-///////////////////////
-// get_subdimensions //
-///////////////////////
-
+//------------------------------------------------------------------------------
+// get_subdimensions
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct empty_dimension {};
 
@@ -62,10 +61,9 @@ auto get_subdimensions(const Shape& shape, const Slices& make_subshapes) {
 }
 }
 
-/////////////////////////
-// SubdimensionIndexes //
-/////////////////////////
-
+//------------------------------------------------------------------------------
+// SubdimensionIndexes
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <class... Slices>
 auto get_subdimension_indexes_impl(const htl::Tuple<Slices...>& slices) {
@@ -83,10 +81,9 @@ using SubdimensionIndexes =
     decltype(get_subdimension_indexes_impl(std::declval<Slices>()));
 }
 
-/////////////////
-// get_strides //
-/////////////////
-
+//------------------------------------------------------------------------------
+// get_strides
+//------------------------------------------------------------------------------
 namespace DETAIL_NS {
 template <std::size_t I, std::size_t J, class StrideI, class Shape>
 auto get_stride(StrideI stride_i, const Shape& shape) {
@@ -127,10 +124,9 @@ auto get_strides(const Shape& shape, const Slices& slices) {
 }
 }
 
-///////////////////
-// make_subshape //
-///////////////////
-
+//------------------------------------------------------------------------------
+// make_subshape
+//------------------------------------------------------------------------------
 template <class Shape, class... Slices,
           CONCEPT_REQUIRES(concept::contiguous_shape<Shape>() &&
                            and_c<concept::slice<Slices>()...>() &&
