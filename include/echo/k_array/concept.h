@@ -53,8 +53,7 @@ auto static_extent_impl(T && ) -> std::false_type;
 
 template <class T>
 constexpr bool static_extent() {
-  using Result =
-      decltype(DETAIL_NS::static_extent_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::static_extent_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -103,8 +102,7 @@ auto static_dimensionality_impl(T && ) -> std::false_type;
 
 template <class T>
 constexpr bool dimensionality() {
-  using Result =
-      decltype(DETAIL_NS::dimensionality_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::dimensionality_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -113,6 +111,22 @@ constexpr bool static_dimensionality() {
   using Result =
       decltype(DETAIL_NS::static_dimensionality_impl(std::declval<T>()));
   return Result::value;
+}
+
+//------------------------------------------------------------------------------
+// compatible_dimensionalities
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+struct CompatibleDimensionalities : Concept {
+  template <class D1, class D2>
+  auto require(D1&& d1, D2&& d2)
+      -> list<!htl::concept::boolean_false_constant<decltype(d1 == d2)>()>;
+};
+}
+
+template <class D1, class D2>
+constexpr bool compatible_dimensionalities() {
+  return models<DETAIL_NS::CompatibleDimensionalities, D1, D2>();
 }
 
 //------------------------------------------------------------------------------
@@ -128,8 +142,7 @@ auto contiguous_shape_impl(T && ) -> std::false_type;
 
 template <class T>
 constexpr bool contiguous_shape() {
-  using Result =
-      decltype(DETAIL_NS::contiguous_shape_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::contiguous_shape_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -219,8 +232,7 @@ auto k_array_deep_impl(T && ) -> std::false_type;
 
 template <class T>
 constexpr bool k_array_deep() {
-  using Result =
-      decltype(DETAIL_NS::k_array_deep_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::k_array_deep_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -238,8 +250,7 @@ auto k_array_view_impl(T && ) -> std::false_type;
 
 template <class T>
 constexpr bool k_array_view() {
-  using Result =
-      decltype(DETAIL_NS::k_array_view_impl(std::declval<T>()));
+  using Result = decltype(DETAIL_NS::k_array_view_impl(std::declval<T>()));
   return Result::value;
 }
 
@@ -252,23 +263,57 @@ constexpr bool k_array() {
 }
 
 //------------------------------------------------------------------------------
+// modifiable_k_array_forward
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+struct ModifiableKArrayForward : Concept {
+  template <class T>
+  auto require(T&& k_array)
+      -> list<concept::k_array<uncvref_t<T>>(),
+              echo::concept::writable<decltype(k_array.data())>()>;
+};
+}
+
+template <class T>
+constexpr bool modifiable_k_array_forward() {
+  return models<DETAIL_NS::ModifiableKArrayForward, T>();
+}
+
+//------------------------------------------------------------------------------
 // contiguous_k_array
 //------------------------------------------------------------------------------
 namespace DETAIL_NS {
 struct ContiguousKArray : Concept {
-  template<class T>
-  auto require(T&& k_array) -> list<
-    concept::k_array<T>(),
-    contiguous_shape<uncvref_t<decltype(k_array.shape())>>()
-  >;
+  template <class T>
+  auto require(T&& k_array)
+      -> list<concept::k_array<T>(),
+              contiguous_shape<uncvref_t<decltype(k_array.shape())>>()>;
 };
 }
 
-template<class T>
+template <class T>
 constexpr bool contiguous_k_array() {
   return models<DETAIL_NS::ContiguousKArray, T>();
 }
 
+//------------------------------------------------------------------------------
+// compatible_k_arrays
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+struct CompatibleKArrays : Concept {
+  template <class A, class B>
+  auto require(A&& a, B&& b) -> list<
+      k_array<A>(), k_array<B>(),
+      compatible_dimensionalities<uncvref_t<decltype(get_dimensionality(a))>,
+                                  uncvref_t<decltype(get_dimensionality(b))>>(),
+      same<uncvref_t<decltype(a.data())>, uncvref_t<decltype(b.data())>>()>;
+};
+}
+
+template <class A, class B>
+constexpr bool compatible_k_arrays() {
+  return models<DETAIL_NS::CompatibleKArrays, A, B>();
+}
 }
 }
 }

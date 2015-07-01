@@ -9,6 +9,7 @@
 #include <echo/k_array/iteration.h>
 #include <echo/k_array/k_array.h>
 #include <echo/k_array/k_array_view.h>
+#include <echo/k_array/copy.h>
 
 namespace echo {
 

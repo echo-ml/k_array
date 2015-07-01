@@ -24,6 +24,8 @@ TEST_CASE("dimensionality") {
   CHECK(!(d3 == d2));
   CHECK(d4 == d2);
 
+  type_equal<decltype(d3 == d2), htl::integral_constant<bool, false>>();
+
   type_equal<decltype(d1), decltype(d5)>();
 }
 
@@ -43,39 +45,6 @@ TEST_CASE("concept2") {
   CHECK(!k_array::concept::contiguous_shape<decltype(s2)>());
 }
 
-TEST_CASE("k_array") {
-  KArray<double, ShapeC<2, 3>> a1;
-  a1 = {{1, 2, 3}, {4, 5, 6}};
-  CHECK(a1(0, 0) == 1);
-  CHECK(a1(0, 1) == 2);
-  CHECK(a1(0, 2) == 3);
-
-  CHECK(a1(1, 0) == 4);
-  CHECK(a1(1, 1) == 5);
-  CHECK(a1(1, 2) == 6);
-}
-
-TEST_CASE("static_k_array") {
-  KArray<double, ShapeC<2, 3>, memory::StaticAllocator<double>> a1;
-  a1(0, 0) = 2;
-  a1(0, 1) = 3;
-  a1(0, 2) = 4;
-
-  a1 = {{3, 4, 6}, {2, 1, 7}};
-}
-
-TEST_CASE("k_array_view2") {
-  double a[3][2] = {{0}};
-  KArrayView<double*, ShapeC<2, 3>> v(&a[0][0], ShapeC<2, 3>());
-  v = {{1, 3, 1}, {4, 3, 1}};
-  CHECK(a[0][0] == 1);
-  CHECK(a[1][0] == 3);
-  CHECK(a[2][0] == 1);
-
-  CHECK(a[0][1] == 4);
-  CHECK(a[1][1] == 3);
-  CHECK(a[2][1] == 1);
-}
 
 TEST_CASE("get_num_elements") {
   Dimensionality<StaticIndex<3>, StaticIndex<2>> d1;
