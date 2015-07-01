@@ -1,3 +1,4 @@
+#include <echo/k_array/iteration.h>
 #include <echo/k_array/dimensionality.h>
 #include <echo/k_array/shape.h>
 #include <echo/k_array/subshape.h>

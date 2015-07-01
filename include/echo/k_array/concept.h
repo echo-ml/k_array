@@ -250,6 +250,25 @@ template <class T>
 constexpr bool k_array() {
   return k_array_deep<T>() || k_array_view<T>();
 }
+
+//------------------------------------------------------------------------------
+// contiguous_k_array
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+struct ContiguousKArray : Concept {
+  template<class T>
+  auto require(T&& k_array) -> list<
+    concept::k_array<T>(),
+    contiguous_shape<uncvref_t<decltype(k_array.shape())>>()
+  >;
+};
+}
+
+template<class T>
+constexpr bool contiguous_k_array() {
+  return models<DETAIL_NS::ContiguousKArray, T>();
+}
+
 }
 }
 }
