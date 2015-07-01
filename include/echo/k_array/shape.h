@@ -4,6 +4,7 @@
 
 #include <echo/k_array/dimensionality.h>
 #include <echo/k_array/concept.h>
+#include <echo/k_array/extent.h>
 #include <echo/htl.h>
 
 namespace echo {
@@ -42,7 +43,7 @@ auto make_shape(const Dimensionality<Extents...>& dimensionality) {
 template <class... Extents,
           CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_shape(Extents... extents) {
-  return Shape<Extents...>(extents...);
+  return Shape<extent_type<Extents>...>(extents...);
 }
 
 template <class... Extents,

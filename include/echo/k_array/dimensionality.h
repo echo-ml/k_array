@@ -27,8 +27,7 @@ struct extents_tag {};
 template <class... Extents>
 class Dimensionality
     : htl::Pack<DETAIL_NS::extents_tag, htl::Tuple<Extents...>> {
-  using Base =
-      htl::Pack<DETAIL_NS::extents_tag, htl::Tuple<Extents...>>;
+  using Base = htl::Pack<DETAIL_NS::extents_tag, htl::Tuple<Extents...>>;
 
  public:
   static constexpr int num_dimensions = sizeof...(Extents);
@@ -60,15 +59,15 @@ template <std::size_t... Indexes, class... Extents>
 auto make_dimensionality_impl(std::index_sequence<Indexes...>,
                               const htl::Tuple<Extents...>& extents) {
   return Dimensionality<decltype(make_extent(htl::get<Indexes>(extents)))...>(
-      make_extent(htl::get<Indexes>(extents))...);
+      htl::get<Indexes>(extents)...);
 }
 }
 
 template <std::size_t N, class Extent,
           CONCEPT_REQUIRES(std::is_convertible<Extent, index_t>::value)>
 auto make_dimensionality(const std::array<Extent, N>& extents) {
-  return DETAIL_NS::make_dimensionality_impl(
-      std::make_index_sequence<N>(), extents);
+  return DETAIL_NS::make_dimensionality_impl(std::make_index_sequence<N>(),
+                                             extents);
 }
 
 //------------------------------------------------------------------------------
@@ -90,8 +89,7 @@ using DimensionalityC = Dimensionality<ExtentC<ExtentsC>...>;
 template <class... Extents,
           CONCEPT_REQUIRES(and_c<concept::extent<Extents>()...>())>
 auto make_dimensionality(Extents... extents) {
-  return Dimensionality<decltype(make_extent(extents))...>(
-      make_extent(extents)...);
+  return Dimensionality<extent_type<Extents>...>(extents...);
 }
 
 template <class... Extents,
@@ -172,8 +170,8 @@ auto num_free_dimensions_impl(Dimensionality dimensionality) {
 template <class Dimensionality,
           CONCEPT_REQUIRES(k_array::concept::dimensionality<Dimensionality>())>
 constexpr int num_free_dimensions() {
-  using Result = decltype(DETAIL_NS::num_free_dimensions_impl(
-      std::declval<Dimensionality>()));
+  using Result = decltype(
+      DETAIL_NS::num_free_dimensions_impl(std::declval<Dimensionality>()));
   return Result::value;
 }
 
@@ -194,8 +192,8 @@ auto free_dimension_impl(Dimensionality dimensionality) {
 template <class Dimensionality,
           CONCEPT_REQUIRES(num_free_dimensions<Dimensionality>() == 1)>
 constexpr int free_dimension() {
-  using Result = decltype(DETAIL_NS::free_dimension_impl(
-      std::declval<Dimensionality>()));
+  using Result =
+      decltype(DETAIL_NS::free_dimension_impl(std::declval<Dimensionality>()));
   return Result::value;
 }
 }
