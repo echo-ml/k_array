@@ -4,6 +4,7 @@
 #include <echo/k_array/dimensionality.h>
 #include <echo/k_array/shape.h>
 #include <echo/k_array/subshape.h>
+#include <echo/k_array/make_subshape.h>
 #include <echo/k_array/shaped.h>
 #include <echo/k_array/dimensioned.h>
 #include <echo/k_array/iteration.h>
@@ -29,5 +30,7 @@ using echo::k_array::KArray;
 using echo::k_array::KArrayView;
 using echo::k_array::get_extent;
 using echo::k_array::get_stride;
+
+namespace slice = k_array::slice;
 
 }  // end namespace echo

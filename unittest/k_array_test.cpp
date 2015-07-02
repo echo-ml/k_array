@@ -45,7 +45,7 @@ TEST_CASE("k_array") {
 
   SECTION("copy") {
     copy(k_array1, k_array2);
-    copy(k_array1, k_array4);
+    // copy(k_array1, k_array4); shouldn't compile
     CHECK(std::equal(all_cbegin(k_array1), all_cend(k_array1),
                      all_cbegin(k_array2)));
   }
