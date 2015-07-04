@@ -66,6 +66,23 @@ constexpr bool dynamic_extent() {
 }
 
 //------------------------------------------------------------------------------
+// compatible_extents
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+struct CompatibleExtents : Concept {
+  template <class E1, class E2>
+  auto require(E1&& e1, E2&& e2)
+      -> list<concept::extent<E1>(), concept::extent<E2>(),
+              !htl::concept::boolean_false_constant<decltype(e1 == e2)>()>;
+};
+}
+
+template <class E1, class E2>
+constexpr bool compatible_extents() {
+  return models<DETAIL_NS::CompatibleExtents, E1, E2>();
+}
+
+//------------------------------------------------------------------------------
 // index_tuple
 //------------------------------------------------------------------------------
 namespace DETAIL_NS {
@@ -139,7 +156,8 @@ namespace DETAIL_NS {
 struct CompatibleDimensionalities : Concept {
   template <class D1, class D2>
   auto require(D1&& d1, D2&& d2)
-      -> list<!htl::concept::boolean_false_constant<decltype(d1 == d2)>()>;
+      -> list<concept::dimensionality<D1>(), concept::dimensionality<D2>(),
+              !htl::concept::boolean_false_constant<decltype(d1 == d2)>()>;
 };
 }
 
