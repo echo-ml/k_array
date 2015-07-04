@@ -67,11 +67,7 @@ class KArray : htl::Pack<Shape>,
   }
 
   KArray& operator=(KArray&& other) noexcept {
-    if (this == std::addressof(other)) return *this;
-    release();
-    modifiable_shape() = other.shape();
-    _data = other._data;
-    other._data = nullptr;
+    swap(other);
     return *this;
   }
 

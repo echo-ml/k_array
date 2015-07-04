@@ -15,7 +15,7 @@ TEST_CASE("k_array") {
   KArray1 k_array1(shape1), k_array2(shape1);
   std::iota(all_begin(k_array1), all_end(k_array1), 0);
 
-  auto k_array_view1  = make_view(k_array1);
+  auto k_array_view1 = make_view(k_array1);
   auto k_array_cview1 = make_cview(k_array1);
 
   KArray<double, Shape<index_t>> k_array3;
@@ -41,6 +41,14 @@ TEST_CASE("k_array") {
   SECTION("move") {
     k_array2 = std::move(k_array1);
     CHECK(k_array2(1, 0, 0) == 1);
+  }
+  SECTION("static move") {
+    KArray<double, ShapeC<2, 3>> k1, k2;
+    k1 = {{1, 2, 3}, {4, 5, 6}};
+    k2 = {{3, 2, 1}, {6, 5, 4}};
+    k1 = std::move(k2);
+    CHECK(k1(0, 0) == 3);
+    CHECK(k2(0, 0) == 1);
   }
 
   SECTION("copy") {

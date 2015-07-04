@@ -36,6 +36,7 @@ TEST_CASE("concept2") {
   Subshape<ShapeC<3, 2>, htl::Tuple<StaticIndex<2>, StaticIndex<8>>> s2;
 
   CHECK(k_array::concept::dimensionality<decltype(d1)>());
+  CHECK(k_array::concept::dimensionality<2, decltype(d1)>());
   CHECK(!k_array::concept::dimensionality<decltype(s1)>());
 
   CHECK(k_array::concept::static_dimensionality<decltype(d2)>());

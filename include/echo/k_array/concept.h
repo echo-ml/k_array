@@ -91,19 +91,38 @@ auto dimensionality_impl(Dimensionality<Extents...> && ) -> std::true_type;
 
 template <class T>
 auto dimensionality_impl(T && ) -> std::false_type;
-
-template <index_t... Indexes>
-auto static_dimensionality_impl(Dimensionality<StaticIndex<Indexes>...> && )
-    -> std::true_type;
-
-template <class T>
-auto static_dimensionality_impl(T && ) -> std::false_type;
 }
 
 template <class T>
 constexpr bool dimensionality() {
   using Result = decltype(DETAIL_NS::dimensionality_impl(std::declval<T>()));
   return Result::value;
+}
+
+namespace DETAIL_NS {
+template <int K>
+struct KDimensionality : Concept {
+  template <class T>
+  auto require(T&& dimensionality)
+      -> list<concept::dimensionality<T>(), T::num_dimensions == K>;
+};
+}
+
+template <int K, class T>
+constexpr bool dimensionality() {
+  return models<DETAIL_NS::KDimensionality<K>, T>();
+}
+
+//------------------------------------------------------------------------------
+// static_dimensionality
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+template <index_t... Indexes>
+auto static_dimensionality_impl(Dimensionality<StaticIndex<Indexes>...> && )
+    -> std::true_type;
+
+template <class T>
+auto static_dimensionality_impl(T && ) -> std::false_type;
 }
 
 template <class T>
@@ -169,6 +188,19 @@ constexpr bool subshape() {
 template <class T>
 constexpr bool shape() {
   return contiguous_shape<T>() || subshape<T>();
+}
+
+namespace DETAIL_NS {
+template <int K>
+struct KShape : Concept {
+  template <class T>
+  auto require(T&& shape) -> list<concept::shape<T>(), T::num_dimensions == K>;
+};
+}
+
+template <int K, class T>
+constexpr bool shape() {
+  return models<DETAIL_NS::KShape<K>, T>();
 }
 
 //------------------------------------------------------------------------------
