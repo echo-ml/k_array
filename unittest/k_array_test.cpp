@@ -42,6 +42,12 @@ TEST_CASE("k_array") {
     k_array2 = std::move(k_array1);
     CHECK(k_array2(1, 0, 0) == 1);
   }
+
+  SECTION("move construct") {
+    KArray1 k_array5(std::move(k_array1));
+    CHECK(k_array5(1, 0, 0) == 1);
+  }
+
   SECTION("static move") {
     KArray<double, ShapeC<2, 3>> k1, k2;
     k1 = {{1, 2, 3}, {4, 5, 6}};
