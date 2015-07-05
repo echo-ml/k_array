@@ -38,7 +38,9 @@ class KArray : htl::Pack<Shape>,
   explicit KArray(const Shape& shape = Shape(),
                   const Allocator& allocator = Allocator())
       : htl::Pack<Shape>(shape), htl::Pack<Allocator>(allocator) {
-    _data = this->allocator().allocate(get_num_elements(*this));
+    _data = nullptr;
+    if (get_num_elements(shape) > 0)
+      _data = this->allocator().allocate(get_num_elements(*this));
   }
 
   KArray(const KArray& other) : KArray(other.shape(), other.allocator()) {
@@ -51,9 +53,10 @@ class KArray : htl::Pack<Shape>,
     copy_construct(other);
   }
 
-  KArray(KArray&& other) : Shape(other.shape()), Allocator(other.allocator()) {
-    _data = other._data;
-    other._data = nullptr;
+  KArray(KArray&& other) : 
+    KArray(Shape(), other.allocator())
+  {
+    swap(other);  
   }
 
   ~KArray() { release(); }
