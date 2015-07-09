@@ -61,7 +61,6 @@ constexpr auto num_dimensions() -> decltype(
 // extent_type
 //------------------------------------------------------------------------------
 template <int I, class Node>
-using extent_type =
-    dimensionality_traits::extent_type<I, dimensionality_type<Node>>;
+using extent_type = decltype(k_array::get_extent<I>(std::declval<Node>()));
 }
 }

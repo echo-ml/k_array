@@ -12,6 +12,9 @@ TEST_CASE("shape concept") {
   CHECK(!k_array::concept::contiguous_shape<decltype(s2)>());
   CHECK(!k_array::concept::subshape<decltype(s1)>());
   CHECK(k_array::concept::subshape<decltype(s2)>());
+
+  CHECK(k_array::concept::shape_<2, decltype(s1)>());
+  CHECK(!k_array::concept::shape_<3, decltype(s1)>());
 }
 
 TEST_CASE("get_stride") {

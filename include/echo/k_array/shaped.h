@@ -19,7 +19,7 @@ decltype(auto) get_shape(const Node& node) {
 // get_stride
 //------------------------------------------------------------------------------
 template <int I, class Node, CONCEPT_REQUIRES(concept::shaped<Node>())>
-auto get_stride(const Node& node) -> decltype(get_stride<I>(get_shape(node))) {
+auto get_stride(const Node& node) {
   return get_stride<I>(get_shape(node));
 }
 }
@@ -53,7 +53,9 @@ using shape_type =
 //------------------------------------------------------------------------------
 // stride_type
 //------------------------------------------------------------------------------
+// template <int I, class Node>
+// using stride_type = shape_traits::stride_type<I, shape_type<Node>>;
 template <int I, class Node>
-using stride_type = shape_traits::stride_type<I, shape_type<Node>>;
+using stride_type = decltype(k_array::get_stride<I>(std::declval<Node>()));
 }
 }

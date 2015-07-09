@@ -69,17 +69,27 @@ constexpr bool dynamic_extent() {
 // compatible_extents
 //------------------------------------------------------------------------------
 namespace DETAIL_NS {
-struct CompatibleExtents : Concept {
-  template <class E1, class E2>
-  auto require(E1&& e1, E2&& e2)
-      -> list<concept::extent<E1>(), concept::extent<E2>(),
-              !htl::concept::boolean_false_constant<decltype(e1 == e2)>()>;
-};
+template <index_t I, index_t J>
+auto compatible_extents_impl(StaticIndex<I>&&, StaticIndex<J> && )
+    -> std::integral_constant<bool, I == J>;
+
+template <index_t I>
+auto compatible_extents_impl(index_t&&, StaticIndex<I> && ) -> std::true_type;
+
+template <index_t I>
+auto compatible_extents_impl(StaticIndex<I>&&, index_t && ) -> std::true_type;
+
+auto compatible_extents_impl(index_t&&, index_t && ) -> std::true_type;
+
+template <class U, class V>
+auto compatible_extents_impl(U&&, V && ) -> std::false_type;
 }
 
 template <class E1, class E2>
 constexpr bool compatible_extents() {
-  return models<DETAIL_NS::CompatibleExtents, E1, E2>();
+  using Result = decltype(DETAIL_NS::compatible_extents_impl(std::declval<E1>(),
+    std::declval<E2>()));
+  return Result::value;
 }
 
 //------------------------------------------------------------------------------
@@ -126,7 +136,7 @@ struct KDimensionality : Concept {
 }
 
 template <int K, class T>
-constexpr bool dimensionality() {
+constexpr bool dimensionality_() {
   return models<DETAIL_NS::KDimensionality<K>, T>();
 }
 
@@ -216,8 +226,8 @@ struct KShape : Concept {
 };
 }
 
-template <int K, class T>
-constexpr bool shape() {
+template<int K, class T>
+constexpr bool shape_() {
   return models<DETAIL_NS::KShape<K>, T>();
 }
 
