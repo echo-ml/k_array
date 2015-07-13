@@ -23,10 +23,16 @@ struct KArrayConstAccessorImpl<std::index_sequence<Indexes...>, Derived,
   decltype(auto) operator()(access_mode::readonly_t,
                             repeat_type_c<Indexes, index_t>... indexes) const {
     const Derived& derived = static_cast<const Derived&>(*this);
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(within_dimensions(derived, {indexes...}));
+    };
     return *(derived.const_data() + get_1d_index(derived.shape(), indexes...));
   }
   decltype(auto) operator()(repeat_type_c<Indexes, index_t>... indexes) const {
     const Derived& derived = static_cast<const Derived&>(*this);
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(within_dimensions(derived, {indexes...}));
+    };
     return *(derived.data() + get_1d_index(derived.shape(), indexes...));
   }
 };
@@ -52,12 +58,18 @@ struct KArrayAccessorImpl<std::index_sequence<Indexes...>, Derived, Shape>
   decltype(auto) operator()(access_mode::readonly_t,
                             repeat_type_c<Indexes, index_t>... indexes) {
     Derived& derived = static_cast<Derived&>(*this);
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(within_dimensions(derived, {indexes...}));
+    };
     return const_cast<decltype(*derived.data())>(
         const_cast<const KArrayAccessorImpl&>(*this).operator()(
             access_mode::readonly, indexes...));
   }
   decltype(auto) operator()(repeat_type_c<Indexes, index_t>... indexes) {
     Derived& derived = static_cast<Derived&>(*this);
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(within_dimensions(derived, {indexes...}));
+    };
     return const_cast<decltype(*derived.data())>(
         const_cast<const KArrayAccessorImpl&>(*this).operator()(indexes...));
   }

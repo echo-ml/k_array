@@ -97,6 +97,9 @@ template <
 index_t get_1d_index(
     const Subshape<Dimensionality<Extents...>, Strides>& subshape,
     Indexes... indexes) {
+  CONTRACT_EXPECT {
+    CONTRACT_ASSERT(within_dimensions(subshape, {indexes...}));
+  };
   return get_1d_index(subshape.strides(), indexes...);
 }
 }

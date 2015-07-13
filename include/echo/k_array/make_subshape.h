@@ -4,6 +4,7 @@
 
 #include <echo/k_array/slice.h>
 #include <echo/k_array/shape_traits.h>
+#include <echo/contract.h>
 
 namespace echo {
 namespace k_array {
@@ -125,6 +126,48 @@ auto get_strides(const Shape& shape, const Slices& slices) {
 }
 
 //------------------------------------------------------------------------------
+// is_subslice
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+template <class Extent>
+bool is_subslice(Extent extent, slice::all_t) {
+  return true;
+}
+
+template <class Extent>
+bool is_subslice(Extent extent, const slice::Range& range) {
+  return (range.b() - range.a()) < extent;
+}
+
+template <class Extent1, class Extent2>
+bool is_subslice(Extent1 extent,
+                 const slice::CountedRange<Extent2>& counted_range) {
+  return (counted_range.a() + counted_range.extent()) < extent;
+}
+
+template <class Extent>
+bool is_subslice(Extent extent, index_t i) {
+  return 0 <= i && i < extent;
+}
+
+template <std::size_t... Indexes, class Shape, class Slices>
+bool is_subshape_impl(std::index_sequence<Indexes...>, const Shape& shape,
+                      const Slices& slices) {
+  return and_(
+      is_subslice(get_extent<Indexes>(shape), std::get<Indexes>(slices))...);
+}
+}
+
+template <class Shape, class... Slices,
+          CONCEPT_REQUIRES(
+              concept::shape<Shape>() && and_c<concept::slice<Slices>()...>() &&
+              shape_traits::num_dimensions<Shape>() == sizeof...(Slices))>
+bool is_subshape(const Shape& shape, const Slices&... slices) {
+  return DETAIL_NS::is_subshape_impl(std::index_sequence_for<Slices...>(),
+                                     shape, std::make_tuple(slices...));
+}
+
+//------------------------------------------------------------------------------
 // make_subshape
 //------------------------------------------------------------------------------
 template <class Shape, class... Slices,
@@ -134,6 +177,7 @@ template <class Shape, class... Slices,
                                sizeof...(Slices) &&
                            !concept::proper_slices<Slices...>())>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
+  CONTRACT_EXPECT { CONTRACT_ASSERT(is_subshape(shape, slices...)); };
   auto slices_tuple = htl::make_tuple(slices...);
   return make_subshape(DETAIL_NS::get_subdimensions(shape, slices_tuple),
                        DETAIL_NS::get_strides(shape, slices_tuple));
@@ -146,6 +190,7 @@ template <class Shape, class... Slices,
                                sizeof...(Slices) &&
                            concept::proper_slices<Slices...>())>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
+  CONTRACT_EXPECT { CONTRACT_ASSERT(is_subshape(shape, slices...)); };
   using SubdimensionIndexes =
       DETAIL_NS::SubdimensionIndexes<htl::Tuple<Slices...>>;
   return make_shape(
@@ -159,6 +204,7 @@ template <class Shape, class... Slices,
                            shape_traits::num_dimensions<Shape>() ==
                                sizeof...(Slices))>
 auto make_subshape(const Shape& shape, const Slices&... slices) {
+  CONTRACT_EXPECT { CONTRACT_ASSERT(is_subshape(shape, slices...)); };
   using SubdimensionIndexes =
       DETAIL_NS::SubdimensionIndexes<htl::Tuple<Slices...>>;
   auto slices_tuple = htl::make_tuple(slices...);

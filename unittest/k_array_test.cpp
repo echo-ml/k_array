@@ -98,3 +98,9 @@ TEST_CASE("static_k_array") {
 
   a1 = {{3, 4, 6}, {2, 1, 7}};
 }
+
+TEST_CASE("k_array within_dimensions") {
+  KArray<double, ShapeC<2, 3>, memory::StaticAllocator<double>> a1;
+  CHECK(within_dimensions(a1, {0, 1}));
+  CHECK(!within_dimensions(a1, {2, 1}));
+}

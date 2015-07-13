@@ -38,6 +38,15 @@ TEST_CASE("dimensionality concept") {
 }
 
 
+TEST_CASE("within_dimensionality") {
+  Dimensionality<StaticIndex<4>, index_t> d2(4_index, 3);
+  CHECK(!within_dimensions(d2, {-1,0}));
+  CHECK(within_dimensions(d2, {1,0}));
+  CHECK(!within_dimensions(d2, {4,0}));
+  CHECK(!within_dimensions(d2, {0,3}));
+  CHECK(within_dimensions(d2, {0,2}));
+}
+
 TEST_CASE("get_num_elements") {
   Dimensionality<StaticIndex<3>, StaticIndex<2>> d1;
   Dimensionality<StaticIndex<4>, index_t> d2(4_index, 3);

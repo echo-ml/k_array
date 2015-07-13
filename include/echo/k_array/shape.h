@@ -6,6 +6,7 @@
 #include <echo/k_array/concept.h>
 #include <echo/k_array/extent.h>
 #include <echo/htl.h>
+#include <echo/contract.h>
 
 namespace echo {
 namespace k_array {
@@ -89,6 +90,7 @@ template <
     CONCEPT_REQUIRES(sizeof...(Extents) == sizeof...(Indexes) &&
                      and_c<std::is_convertible<Indexes, index_t>::value...>())>
 index_t get_1d_index(const Shape<Extents...>& shape, Indexes... indexes) {
+  CONTRACT_EXPECT { CONTRACT_ASSERT(within_dimensions(shape, {indexes...})); };
   return DETAIL_NS::get_1d_index_impl(shape.extents(), indexes...);
 }
 }

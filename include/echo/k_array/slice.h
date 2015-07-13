@@ -3,6 +3,7 @@
 #define DETAIL_NS detail_slice
 
 #include <echo/k_array/concept.h>
+#include <echo/contract.h>
 
 namespace echo {
 namespace k_array {
@@ -27,7 +28,13 @@ constexpr bool all() {
 //------------------------------------------------------------------------------
 class Range {
  public:
-  Range(index_t a, index_t b) : _a(a), _b(b) {}
+  Range(index_t a, index_t b) : _a(a), _b(b) 
+  {
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(a >= 0);
+      CONTRACT_ASSERT(a <= b);
+    };
+  }
   auto a() const { return _a; }
   auto b() const { return _b; }
 
@@ -50,7 +57,13 @@ constexpr bool range() {
 template <class Extent>
 class CountedRange {
  public:
-  CountedRange(index_t a, Extent extent) : _a(a), _extent(extent) {}
+  CountedRange(index_t a, Extent extent) : _a(a), _extent(extent) 
+  {
+    CONTRACT_EXPECT {
+      CONTRACT_ASSERT(a >= 0);
+      CONTRACT_ASSERT(extent >= 0);
+    };
+  }
   index_t a() const { return _a; }
   Extent extent() const { return _extent; }
 

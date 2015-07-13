@@ -64,3 +64,18 @@ template <int I, class Node>
 using extent_type = decltype(k_array::get_extent<I>(std::declval<Node>()));
 }
 }
+
+namespace echo {
+namespace k_array {
+//------------------------------------------------------------------------------
+// within_dimensions
+//------------------------------------------------------------------------------
+template <class Node, CONCEPT_REQUIRES(concept::dimensioned<Node>())>
+bool within_dimensions(
+    const Node& node,
+    const std::array<index_t, dimensioned_traits::num_dimensions<Node>()>&
+        point) {
+  return within_dimensions(get_dimensionality(node), point);
+}
+}
+}

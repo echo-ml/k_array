@@ -5,6 +5,7 @@
 #include <echo/k_array/concept.h>
 #include <echo/k_array/extent.h>
 #include <echo/htl.h>
+#include <echo/contract.h>
 #include <array>
 
 namespace echo {
@@ -33,7 +34,9 @@ class Dimensionality
   static constexpr int num_dimensions = sizeof...(Extents);
   Dimensionality() : Base(htl::Tuple<Extents...>(Extents()...)) {}
   explicit Dimensionality(Extents... extents)
-      : Base(htl::Tuple<Extents...>(extents...)) {}
+      : Base(htl::Tuple<Extents...>(extents...)) {
+    CONTRACT_EXPECT { CONTRACT_ASSERT(and_((0 <= extents)...)); };
+  }
 
   template <int I, CONCEPT_REQUIRES(I >= 0 && I < sizeof...(Extents))>
   auto extent() const {
@@ -133,6 +136,26 @@ template <class... LhsExtents, class... RhsExtents>
 auto operator!=(const Dimensionality<LhsExtents...>& lhs,
                 const Dimensionality<RhsExtents...>& rhs) {
   return lhs.extents() != rhs.extents();
+}
+
+//------------------------------------------------------------------------------
+// within_dimensions
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+template <std::size_t... Indexes, class Dimensionality, class Point>
+bool within_dimensions_impl(std::index_sequence<Indexes...>,
+                            const Dimensionality& dimensionality,
+                            const Point& point) {
+  return and_(
+      (0 <= std::get<Indexes>(point) &&
+       std::get<Indexes>(point) < get_extent<Indexes>(dimensionality))...);
+}
+}
+template <class... Extents>
+bool within_dimensions(const Dimensionality<Extents...>& dimensionality,
+                       const std::array<index_t, sizeof...(Extents)>& point) {
+  return DETAIL_NS::within_dimensions_impl(
+      std::index_sequence_for<Extents...>(), dimensionality, point);
 }
 }
 
