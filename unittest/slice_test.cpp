@@ -25,7 +25,7 @@ TEST_CASE("make_subshape2") {
   CHECK_THROWS_AS(make_subshape(shape1, slice::all, slice::all, 5, slice::all),
                   echo::ContractViolation);
   CHECK_THROWS_AS(make_subshape(shape1, slice::all, slice::all,
-                                slice::counted_range(3, 2), slice::all),
+                                slice::counted_range(3, 3), slice::all),
                   echo::ContractViolation);
 
   type_equal<decltype(subshape2), Shape<StaticIndex<2>, StaticIndex<3>>>();

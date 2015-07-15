@@ -142,7 +142,7 @@ bool is_subslice(Extent extent, const slice::Range& range) {
 template <class Extent1, class Extent2>
 bool is_subslice(Extent1 extent,
                  const slice::CountedRange<Extent2>& counted_range) {
-  return (counted_range.a() + counted_range.extent()) < extent;
+  return (counted_range.a() + counted_range.extent() - 1) < extent;
 }
 
 template <class Extent>
