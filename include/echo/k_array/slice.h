@@ -28,8 +28,7 @@ constexpr bool all() {
 //------------------------------------------------------------------------------
 class Range {
  public:
-  Range(index_t a, index_t b) : _a(a), _b(b) 
-  {
+  Range(index_t a, index_t b) : _a(a), _b(b) {
     CONTRACT_EXPECT {
       CONTRACT_ASSERT(a >= 0);
       CONTRACT_ASSERT(a <= b);
@@ -57,8 +56,7 @@ constexpr bool range() {
 template <class Extent>
 class CountedRange {
  public:
-  CountedRange(index_t a, Extent extent) : _a(a), _extent(extent) 
-  {
+  CountedRange(index_t a, Extent extent) : _a(a), _extent(extent) {
     CONTRACT_EXPECT {
       CONTRACT_ASSERT(a >= 0);
       CONTRACT_ASSERT(extent >= 0);
@@ -91,6 +89,20 @@ constexpr bool counted_range() {
   using Result = decltype(DETAIL_NS::counted_range_impl(std::declval<T>()));
   return Result::value;
 }
+}
+
+//------------------------------------------------------------------------------
+// get_first_index
+//------------------------------------------------------------------------------
+inline index_t get_first_index(index_t a) { return a; }
+
+inline index_t get_first_index(all_t) { return 0; }
+
+inline index_t get_first_index(const Range& range) { return range.a(); }
+
+template <class Extent>
+index_t get_first_index(const CountedRange<Extent>& range) {
+  return range.a();
 }
 }
 

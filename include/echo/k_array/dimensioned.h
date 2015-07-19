@@ -51,9 +51,8 @@ using dimensionality_type =
 //------------------------------------------------------------------------------
 // num_dimensions
 //------------------------------------------------------------------------------
-template <class Node>
-constexpr auto num_dimensions() -> decltype(
-    dimensionality_traits::num_dimensions<dimensionality_type<Node>>()) {
+template <class Node, CONCEPT_REQUIRES(k_array::concept::dimensioned<Node>())>
+constexpr auto num_dimensions() {
   return dimensionality_traits::num_dimensions<dimensionality_type<Node>>();
 }
 
