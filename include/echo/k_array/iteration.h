@@ -1,7 +1,7 @@
 #pragma once
 
 #include <echo/k_array/concept.h>
-#include <echo/utility/range.h>
+#include <echo/utility/iterator_range.h>
 
 namespace echo {
 namespace k_array {
@@ -48,7 +48,7 @@ auto all_cend(KArray&& k_array) {
 template <class KArray,
           CONCEPT_REQUIRES(concept::contiguous_k_array<uncvref_t<KArray>>())>
 auto all_range(KArray&& k_array) {
-  return make_range(all_begin(k_array), all_end(k_array));
+  return make_iterator_range(all_begin(k_array), all_end(k_array));
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ auto all_range(KArray&& k_array) {
 template <class KArray,
           CONCEPT_REQUIRES(concept::contiguous_k_array<uncvref_t<KArray>>())>
 auto all_crange(KArray&& k_array) {
-  return make_range(all_cbegin(k_array), all_cend(k_array));
+  return make_iterator_range(all_cbegin(k_array), all_cend(k_array));
 }
 }
 }
