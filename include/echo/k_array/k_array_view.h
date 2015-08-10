@@ -67,8 +67,10 @@ auto make_k_array_view(Pointer data, const Shape& shape) {
 }
 
 template <class MemoryBackendTag, class Pointer, class Shape,
-          CONCEPT_REQUIRES(echo::concept::contiguous_iterator<Pointer>() &&
-                           concept::shape<Shape>())>
+          CONCEPT_REQUIRES(
+              echo::memory::concept::memory_backend_tag<MemoryBackendTag>() &&
+              echo::concept::contiguous_iterator<Pointer>() &&
+              concept::shape<Shape>())>
 auto make_k_array_view(Pointer data, const Shape& shape) {
   return KArrayView<Pointer, Shape, MemoryBackendTag>(data, shape);
 }
