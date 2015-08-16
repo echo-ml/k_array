@@ -100,7 +100,7 @@ template <class... Extents, CONCEPT_REQUIRES(and_c<extent<Extents>()...>())>
 auto index_tuple_impl(htl::Tuple<Extents...> && ) -> std::true_type;
 
 template <class T>
-auto index_timple_impl(T && ) -> std::false_type;
+auto index_tuple_impl(T && ) -> std::false_type;
 }
 
 template <class T>
