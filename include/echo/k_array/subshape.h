@@ -4,6 +4,7 @@
 
 #include <echo/k_array/concept.h>
 #include <echo/k_array/extent.h>
+#include <echo/k_array/shape.h>
 
 namespace echo {
 namespace k_array {
@@ -44,14 +45,57 @@ auto make_strides(Strides... strides) {
 }
 
 //------------------------------------------------------------------------------
-// make_subshape
+// is_contiguous_subshape
 //------------------------------------------------------------------------------
+namespace DETAIL_NS {
+template <std::size_t... Indexes, class Dimensionality>
+auto get_contiguous_strides_impl(std::index_sequence<Indexes...>,
+                                 const Dimensionality& dimensionality) {
+  auto shape = make_shape(dimensionality);
+  return make_strides(get_stride<Indexes>(shape)...);
+}
+
+template <class... Extents>
+auto get_contiguous_strides(const Dimensionality<Extents...>& dimensionality) {
+  return get_contiguous_strides_impl(std::index_sequence_for<Extents...>(),
+                                     dimensionality);
+}
+}
+
 template <class Dimensionality, class Strides,
           CONCEPT_REQUIRES(concept::dimensionality<Dimensionality>() &&
                            concept::index_tuple<Strides>())>
+auto is_contiguous_subshape(const Dimensionality& dimensionality,
+                            const Strides& strides) {
+  auto contiguous_strides = DETAIL_NS::get_contiguous_strides(dimensionality);
+  return contiguous_strides == strides;
+}
+
+//------------------------------------------------------------------------------
+// make_subshape
+//------------------------------------------------------------------------------
+template <
+    class Dimensionality, class Strides,
+    CONCEPT_REQUIRES(
+        concept::dimensionality<Dimensionality>() &&
+        concept::index_tuple<Strides>() &&
+        !htl::concept::boolean_true_constant<decltype(is_contiguous_subshape(
+            std::declval<Dimensionality>(), std::declval<Strides>()))>())>
 auto make_subshape(const Dimensionality& dimensionality,
                    const Strides& strides) {
   return Subshape<Dimensionality, Strides>(dimensionality, strides);
+}
+
+template <
+    class Dimensionality, class Strides,
+    CONCEPT_REQUIRES(
+        concept::dimensionality<Dimensionality>() &&
+        concept::index_tuple<Strides>() &&
+        htl::concept::boolean_true_constant<decltype(is_contiguous_subshape(
+            std::declval<Dimensionality>(), std::declval<Strides>()))>())>
+auto make_subshape(const Dimensionality& dimensionality,
+                   const Strides& strides) {
+  return make_shape(dimensionality);
 }
 
 //------------------------------------------------------------------------------

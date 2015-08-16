@@ -67,3 +67,39 @@ TEST_CASE("shaped") {
   CHECK(get_extent<1>(d1) == 8);
   CHECK(get_stride<1>(s1) == 3);
 }
+
+TEST_CASE("is_contiguous_subshape") {
+  auto d1 = make_dimensionality(3, 4);
+  auto d2 = make_dimensionality(5_index, 2);
+
+  auto s1 = make_strides(10, 30);
+  auto s2 = make_strides(1_index, 5_index);
+  auto s3 = make_strides(3_index, 15_index);
+
+  auto b1 = is_contiguous_subshape(d1, s1);
+  auto b2 = is_contiguous_subshape(d2, s2);
+  auto b3 = is_contiguous_subshape(d2, s3);
+
+  type_equal<decltype(b1), bool>();
+  type_equal<decltype(b2), htl::integral_constant<bool, true>>();
+  type_equal<decltype(b3), htl::integral_constant<bool, false>>();
+
+  CHECK(!b1);
+}
+
+TEST_CASE("make_subshape") {
+  auto d1 = make_dimensionality(3, 4);
+  auto d2 = make_dimensionality(5_index, 2);
+
+  auto s1 = make_strides(10, 30);
+  auto s2 = make_strides(1_index, 5_index);
+  auto s3 = make_strides(3_index, 15_index);
+
+  auto subshape1 = make_subshape(d1, s1);
+  auto subshape2 = make_subshape(d2, s2);
+  auto subshape3 = make_subshape(d2, s3);
+
+  CHECK(!k_array::concept::contiguous_shape<decltype(subshape1)>());
+  CHECK(k_array::concept::contiguous_shape<decltype(subshape2)>());
+  CHECK(!k_array::concept::contiguous_shape<decltype(subshape1)>());
+}
