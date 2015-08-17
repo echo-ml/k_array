@@ -53,11 +53,7 @@ class KArray : htl::Pack<Shape>,
     copy_construct(other);
   }
 
-  KArray(KArray&& other) : 
-    KArray(Shape(), other.allocator())
-  {
-    swap(other);  
-  }
+  KArray(KArray&& other) : KArray(Shape(), other.allocator()) { swap(other); }
 
   ~KArray() { release(); }
 
@@ -150,7 +146,11 @@ class KArray<T, Shape, memory::StaticAllocator<T, Alignment>>
   CONCEPT_ASSERT(concept::static_shape<Shape>(),
                  "shape must be static for static arrays");
 
+  using Allocator = memory::StaticAllocator<T, Alignment>;
+
  public:
+  explicit KArray(const Shape& = Shape(),
+                  const Allocator& = Allocator()) noexcept {}
   using pointer = T*;
   using const_pointer = const T*;
   using reference = T&;
