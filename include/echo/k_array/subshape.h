@@ -60,15 +60,57 @@ auto get_contiguous_strides(const Dimensionality<Extents...>& dimensionality) {
   return get_contiguous_strides_impl(std::index_sequence_for<Extents...>(),
                                      dimensionality);
 }
+
+inline auto is_contiguous_subshape_impl(const htl::Tuple<>&,
+                                        const htl::Tuple<>&,
+                                        const htl::Tuple<>&) {
+  return htl::integral_constant<bool, true>();
 }
 
-template <class Dimensionality, class Strides,
-          CONCEPT_REQUIRES(concept::dimensionality<Dimensionality>() &&
-                           concept::index_tuple<Strides>())>
+template <class DimensionFirst, class... DimensionsRest, class Stride1First,
+          class... Strides1Rest, class Stride2First, class... Strides2Rest,
+          CONCEPT_REQUIRES(!std::is_same<DimensionFirst, StaticIndex<1>>())>
+auto is_contiguous_subshape_impl(
+    const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
+    const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
+    const htl::Tuple<Stride2First, Strides2Rest...>& strides2);
+
+template <class DimensionFirst, class... DimensionsRest, class Stride1First,
+          class... Strides1Rest, class Stride2First, class... Strides2Rest,
+          CONCEPT_REQUIRES(std::is_same<DimensionFirst, StaticIndex<1>>())>
+auto is_contiguous_subshape_impl(
+    const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
+    const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
+    const htl::Tuple<Stride2First, Strides2Rest...>& strides2) {
+  return is_contiguous_subshape_impl(htl::tail(dimensions), htl::tail(strides1),
+                                     htl::tail(strides2));
+}
+
+template <class DimensionFirst, class... DimensionsRest, class Stride1First,
+          class... Strides1Rest, class Stride2First, class... Strides2Rest,
+          CONCEPT_REQUIRES_REDECLARATION(
+              !std::is_same<DimensionFirst, StaticIndex<1>>())>
+auto is_contiguous_subshape_impl(
+    const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
+    const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
+    const htl::Tuple<Stride2First, Strides2Rest...>& strides2) {
+  return htl::head(strides1) == htl::head(strides2) &&
+         is_contiguous_subshape_impl(htl::tail(dimensions), htl::tail(strides1),
+                                     htl::tail(strides2));
+}
+}
+
+template <
+    class Dimensionality, class Strides,
+    CONCEPT_REQUIRES(concept::dimensionality<Dimensionality>() &&
+                     concept::index_tuple<Strides>() &&
+                     dimensionality_traits::num_dimensions<Dimensionality>() ==
+                         htl::tuple_traits::num_elements<Strides>())>
 auto is_contiguous_subshape(const Dimensionality& dimensionality,
                             const Strides& strides) {
   auto contiguous_strides = DETAIL_NS::get_contiguous_strides(dimensionality);
-  return contiguous_strides == strides;
+  return DETAIL_NS::is_contiguous_subshape_impl(dimensionality.extents(),
+                                                strides, contiguous_strides);
 }
 
 //------------------------------------------------------------------------------

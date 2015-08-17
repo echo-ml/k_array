@@ -90,16 +90,20 @@ TEST_CASE("is_contiguous_subshape") {
 TEST_CASE("make_subshape") {
   auto d1 = make_dimensionality(3, 4);
   auto d2 = make_dimensionality(5_index, 2);
+  auto d3 = make_dimensionality(3, 1_index, 1_index);
 
   auto s1 = make_strides(10, 30);
   auto s2 = make_strides(1_index, 5_index);
   auto s3 = make_strides(3_index, 15_index);
+  auto s4 = make_strides(1_index, 10, 15);
 
   auto subshape1 = make_subshape(d1, s1);
   auto subshape2 = make_subshape(d2, s2);
   auto subshape3 = make_subshape(d2, s3);
+  auto subshape4 = make_subshape(d3, s4);
 
   CHECK(!k_array::concept::contiguous_shape<decltype(subshape1)>());
   CHECK(k_array::concept::contiguous_shape<decltype(subshape2)>());
   CHECK(!k_array::concept::contiguous_shape<decltype(subshape1)>());
+  CHECK(k_array::concept::contiguous_shape<decltype(subshape4)>());
 }
