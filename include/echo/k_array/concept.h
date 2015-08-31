@@ -87,8 +87,8 @@ auto compatible_extents_impl(U&&, V && ) -> std::false_type;
 
 template <class E1, class E2>
 constexpr bool compatible_extents() {
-  using Result = decltype(DETAIL_NS::compatible_extents_impl(std::declval<E1>(),
-    std::declval<E2>()));
+  using Result = decltype(DETAIL_NS::compatible_extents_impl(
+      std::declval<E1>(), std::declval<E2>()));
   return Result::value;
 }
 
@@ -226,7 +226,7 @@ struct KShape : Concept {
 };
 }
 
-template<int K, class T>
+template <int K, class T>
 constexpr bool shape_() {
   return models<DETAIL_NS::KShape<K>, T>();
 }
@@ -354,6 +354,23 @@ struct ContiguousKArray : Concept {
 template <class T>
 constexpr bool contiguous_k_array() {
   return models<DETAIL_NS::ContiguousKArray, T>();
+}
+
+//------------------------------------------------------------------------------
+// k_array_
+//------------------------------------------------------------------------------
+namespace DETAIL_NS {
+template <int K>
+struct KKArray : Concept {
+  template <class T>
+  auto require(T&& k_array) -> list<
+      concept::k_array<T>(), shape_<K, uncvref_t<decltype(k_array.shape())>>()>;
+};
+}
+
+template <int K, class T>
+constexpr bool k_array_() {
+  return models<DETAIL_NS::KKArray<K>, T>();
 }
 
 //------------------------------------------------------------------------------

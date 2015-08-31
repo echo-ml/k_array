@@ -104,3 +104,14 @@ TEST_CASE("k_array within_dimensions") {
   CHECK(within_dimensions(a1, {0, 1}));
   CHECK(!within_dimensions(a1, {2, 1}));
 }
+
+TEST_CASE("single_iteration") {
+  KArray<double, ShapeC<3>> k1;
+  k1 = {1, 2, 3};
+  auto i = begin(k1);
+  auto last = end(k1);
+  CHECK(*i++ == 1);
+  CHECK(*i++ == 2);
+  CHECK(*i++ == 3);
+  CHECK(i == last);
+}
