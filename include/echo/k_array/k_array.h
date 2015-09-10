@@ -43,7 +43,7 @@ class KArray : htl::Pack<Shape>,
       _data = this->allocator().allocate(get_num_elements(*this));
   }
 
-  KArray(const KArray& other) : KArray(other.shape(), other.allocator()) {
+  KArray(const KArray& other) : htl::Pack<Allocator>(other.allocator()) {
     copy_construct(other);
   }
 
