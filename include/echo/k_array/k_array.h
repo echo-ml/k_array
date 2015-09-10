@@ -53,7 +53,12 @@ class KArray : htl::Pack<Shape>,
     copy_construct(other);
   }
 
-  KArray(KArray&& other) : KArray(Shape(), other.allocator()) { swap(other); }
+  KArray(KArray&& other)
+      : htl::Pack<Shape>(other.shape()),
+        htl::Pack<Allocator>(other.allocator()),
+        _data(other._data) {
+    other._data = nullptr;
+  }
 
   ~KArray() { release(); }
 
@@ -99,6 +104,10 @@ class KArray : htl::Pack<Shape>,
   void copy_construct(const KArray<OtherT, Shape, OtherAllocator>& other) {
     auto other_num_elements = get_num_elements(other);
     modifiable_shape() = other.shape();
+    if (other_num_elements == 0) {
+      _data = nullptr;
+      return;
+    }
     _data = this->allocator().allocate(other_num_elements);
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),
          other.data(), std::next(other.data(), other_num_elements),
@@ -114,7 +123,9 @@ class KArray : htl::Pack<Shape>,
     // TODO: allow for reallocation
     if (this_num_elements != other_num_elements) {
       release();
-      _data = this->allocator().allocate(other_num_elements);
+      _data = other_num_elements > 0
+                  ? this->allocator().allocate(other_num_elements)
+                  : nullptr;
     }
     modifiable_shape() = other.shape();
     copy(memory_backend_traits::memory_backend_tag<OtherAllocator>(),

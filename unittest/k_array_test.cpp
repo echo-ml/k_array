@@ -21,7 +21,7 @@ TEST_CASE("k_array") {
   KArray<double, Shape<index_t>> k_array3;
   CHECK(get_num_elements(k_array3) == 0);
 
-  KArray2 k_array4;
+  KArray2 k_array4, k_array5;
 
   SECTION("accessor") {
     CHECK(k_array1(1, 0, 0) == 1);
@@ -44,8 +44,13 @@ TEST_CASE("k_array") {
   }
 
   SECTION("move construct") {
-    KArray1 k_array5(std::move(k_array1));
-    CHECK(k_array5(1, 0, 0) == 1);
+    KArray1 k_array6(std::move(k_array1));
+    CHECK(k_array6(1, 0, 0) == 1);
+  }
+
+  SECTION("static_move_construct") {
+    KArray2 k_array6;
+    KArray2 k_array7{std::move(k_array6)};
   }
 
   SECTION("static move") {
