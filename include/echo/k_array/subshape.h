@@ -69,7 +69,7 @@ inline auto is_contiguous_subshape_impl(const htl::Tuple<>&,
 
 template <class DimensionFirst, class... DimensionsRest, class Stride1First,
           class... Strides1Rest, class Stride2First, class... Strides2Rest,
-          CONCEPT_REQUIRES(!std::is_same<DimensionFirst, StaticIndex<1>>())>
+          CONCEPT_REQUIRES(!std::is_same<DimensionFirst, StaticIndex<1>>::value)>
 auto is_contiguous_subshape_impl(
     const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
     const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
@@ -77,7 +77,7 @@ auto is_contiguous_subshape_impl(
 
 template <class DimensionFirst, class... DimensionsRest, class Stride1First,
           class... Strides1Rest, class Stride2First, class... Strides2Rest,
-          CONCEPT_REQUIRES(std::is_same<DimensionFirst, StaticIndex<1>>())>
+          CONCEPT_REQUIRES(std::is_same<DimensionFirst, StaticIndex<1>>::value)>
 auto is_contiguous_subshape_impl(
     const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
     const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
@@ -89,7 +89,7 @@ auto is_contiguous_subshape_impl(
 template <class DimensionFirst, class... DimensionsRest, class Stride1First,
           class... Strides1Rest, class Stride2First, class... Strides2Rest,
           CONCEPT_REQUIRES_REDECLARATION(
-              !std::is_same<DimensionFirst, StaticIndex<1>>())>
+              !std::is_same<DimensionFirst, StaticIndex<1>>::value)>
 auto is_contiguous_subshape_impl(
     const htl::Tuple<DimensionFirst, DimensionsRest...>& dimensions,
     const htl::Tuple<Stride1First, Strides1Rest...>& strides1,
