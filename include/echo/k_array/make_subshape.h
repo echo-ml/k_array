@@ -136,13 +136,15 @@ bool is_subslice(Extent extent, slice::all_t) {
 
 template <class Extent>
 bool is_subslice(Extent extent, const slice::Range& range) {
-  return (range.b() - range.a()) < extent;
+  return 0 <= range.a() && range.a() <= range.b() && range.b() <= extent;
 }
 
 template <class Extent1, class Extent2>
 bool is_subslice(Extent1 extent,
                  const slice::CountedRange<Extent2>& counted_range) {
-  return (counted_range.a() + counted_range.extent() - 1) < extent;
+  return is_subslice(extent,
+                     slice::Range(counted_range.a(),
+                                  counted_range.a() + counted_range.extent()));
 }
 
 template <class Extent>
