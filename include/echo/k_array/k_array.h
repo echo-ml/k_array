@@ -120,7 +120,6 @@ class KArray : htl::Pack<Shape>,
     if (this == std::addressof(other)) return *this;
     auto this_num_elements = get_num_elements(*this);
     auto other_num_elements = get_num_elements(other);
-    // TODO: allow for reallocation
     if (this_num_elements != other_num_elements) {
       release();
       _data = other_num_elements > 0
